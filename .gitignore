@@ -1,0 +1,9 @@
+#test files
+test.hs
+
+#Third part files
+learnhaskell-pt.hs
+
+#OS generated files
+.DS_Store
+.DS_Store?
