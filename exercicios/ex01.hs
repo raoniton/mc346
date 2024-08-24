@@ -1,5 +1,3 @@
-main :: IO ()
-main = putStrLn "Hello, world!"
 {-
 Exercicios
 Fazer os exercícios usando head tail : ++ mod (modulo), let e pattern matching
@@ -56,10 +54,6 @@ range_rev' n = n: range_rev (n-1)
 -}
 
 -- 8) posição do item na lista (0 se não esta lá, 1 se é o primeiro) **
-posItem item [] = 0
-posItem item (x:[]) = if item == x then 1 else 0
-posItem item (x:xs) = if item == x then 1  else 0 + pos item xs
-
 
 -- 9) reverte uma lista
 reverte [] = []
@@ -103,17 +97,8 @@ checkOrd (x:xs) = if [x] <= xs then checkOrd xs else False
 -- 16) shift para a direita
 {-
 shiftr [1,2,3,4]
- ==> [4,1,2,3]
-
- 1 2 3
-   1   2 3
-       2    3
-            3 
-            
+ ==> [4,1,2,3]        
  -}
-shiftr [] = []
-shiftr (x:[]) = [x]
-shiftr (x:xs) = (shiftr xs)
 
 -- 17) shiftr n lista (shift direita n vezes)
 
