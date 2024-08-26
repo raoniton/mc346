@@ -1045,3 +1045,227 @@ splitall "qwertyuiopoiuytxxt" 't'
 4. drop n lista - a lista sem os n primeiros elementos - essa função já esta implementada no Prelude
 5. take n lista - os primeiros n elementos da lista - essa função já esta implementada no Prelude
 </details>
+
+
+
+
+
+<details>
+  <summary>Aula 4 - Tipos em Haskell, Definindo o tipo na declaração da função</summary>
+
+Aula 4
+##### [livro texto](https://learnyouahaskell.github.io/chapters) capitulos: 3
+
+#### [haskell online](https://repl.it/languages/haskell)
+
+
+## Por que aprender Haskell!!
+~~~Haskell
+qs [] = []
+qs (x:xs) = qs menores ++ [x] ++ qs maiores
+    where  menores = [y | y <- xs, y<=x]
+           maiores = [y | y <- xs, y>x]
+~~~
+<br>
+
+## Tipos
+~~~Haskell
+:t head
+head :: [a] -> a
+~~~
+
+indica uma função que recebe uma lista de valores do tipo a e retorna um valor do tipo `a`
+
+**a** é uma variável de tipo (type variable)
+
+~~~Haskell
+removeAll c lista = [y | y <- lista, y /= c]
+
+:t removeAll
+removeAll :: Eq t => t -> [t] -> [t]
+~~~
+
+a parte “`t -> [t] -> [t]`” indica que é uma função de 2 argumentos, um dado e uma lista de dados, que retorna uma lista de dados (porque os 2 argumentos são separados por uma flecha fica para outra aula - **currying**)
+
+“`Eq t =>`” indica que o tipo `t` tem restrições, e tem que pertencer ao typeclass Eq que sao tipos para os quais a comparação de igualdade esta definida (quase todos mas não funções!!)
+
+- Eq tem igualdade (==)
+- Ord tem ordem (>)
+- Num tem as operações aritméticas (+, -, * e abs) definidas . Num é parte do Eq mas não do Ord (números complexos não tem ordem!!) Divisão nao esta incluida nos Num por causa dos inteiros
+- Show pode ser impresso (convertido para string) - função show
+- Read pode ser lido (de um string) - função read
+
+Quando voce definir seus tipos, voce poderá definir o que == (Eq) significa para o seu tipo, da mesma forma o show, read, < etc
+<br>
+
+## Tipos básicos
+- Int inteiros de maquina
+- Integer inteiros sem limite de tamanho (como no Python)
+- Float do C
+- Double do C
+- Bool booleano
+- Char caracter
+<br>
+
+## Outros tipos genéricos
+- Integral genérico de inteiros e operação de divisão inteira e resto
+- Fractional genérico para floats e operação de divisão real
+- Floating generico para floats e operações exponenciais, trigonométricas, etc
+<br>
+
+## Booleanos
+- True
+- False
+- || or nas comparações
+- && and nas comparações
+- not
+- and é o and de uma lista de booleanos
+
+~~~Haskell
+Prelude> :t and
+and :: Foldable t => t Bool -> Bool
+~~~
+`t` é qualquer modificador de tipo que é Foldable - lista [] é um modificator foldable
+
+~~~Haskell
+membro x [] = False
+membro x (a:as) 
+    | x == a = True
+    | otherwise = membro x as
+
+-- ou
+
+membro x [] = False
+membro x (a:as) = x==a || membro x as
+~~~
+
+4 \`membro` [ 3,2,4,5,6,4,3,2,1]
+
+para toda toda função binaria f voce pode criar um operador), uma função infixa
+
+~~~
+f arg1 arg2 
+
+arg1 `f` arg2
+~~~
+
+<br>
+
+## Definindo o tipo na declaração da função
+~~~Haskell
+ordenada :: Ord a => [a] -> Bool
+ordenada [] = True
+ordenada [x] = True
+ordenada (a:b:xs)
+   | a <= b = ordenada (b:xs)
+   | otherwise = False
+
+-- ou 
+
+ordenada [] = True
+ordenada [x] = True
+ordenada (a:b:xs) = a<=b && ordenada (b:xs)
+remove1 :: Eq a => a -> [a] -> [a]
+remove1 _ _ [] = []
+remove1 it (x:xs) 
+  | x == it = xs
+  | otherwise =  x : (remove1 it xs)
+~~~
+remove1 8  [2,4,5,8,7,6,8,7]
+
+remove1 'a' "qwertiaiuyta"
+não é preciso declarar o tipo da função, o haskell infere, mas de vez em quando isso ajuda no debug.
+<br>
+
+## Exemplos de exercicios
+### Posicoes
+~~~Haskell
+posicoes :: Eq a => a -> [a] -> [Int]
+posicoes _ [] = []
+posicoes it (a:as)
+    | it == a = 1:resto
+    | otherwise = resto
+    where
+      resto = soma1 (posicoes it as)
+      soma1 [] = []
+      soma1 (n:ns) = (n+1): (soma1 ns)
+~~~
+outra solucao - um parametro a mais
+
+~~~Haskell
+posicoes it lst = posicoes' it lst 1
+
+posicoes' _ [] _ = []
+posicoes' it (a:as) n =
+    let aux = posicoes' it as (n+1)
+    in if it == a 
+        then n:aux
+        else aux
+~~~
+<br>
+
+## Split
+uma ideia baseada em acumulador, vai acumulando os itens “errados” ate achar o item separador
+
+~~~Haskell 
+split:: Eq a => a -> [a] -> [[a]]
+split sep lista = split' sep lista []
+
+split' _ [] acc = [acc] -- diferente da recursao com acumulador tradicional
+split' sep (x:xs) acc 
+    | sep==x = [acc, xs]
+    | otherwise = split' sep xs acc_novo
+        where acc_novo = acc ++ [x]
+~~~
+o split' deve no futuro ser uma funcao local do split, mas para testar crie ele como uma função global.
+
+
+### melhorias
+
+- sempre fique suspeito de coisas como acc ++ [a]
+- grudar no final é custoso, grudar na frente é rápido, mas a ordem fica inversa
+- grude na frente e no final chame o reverte
+
+~~~Haskell
+split' _ [] acc = [reverse acc] 
+split' sep (x:xs) acc 
+    | sep==x = [reverse acc, xs]
+    | otherwise = split' sep xs (x:acc)
+~~~
+
+split 4 [1,2,3,4,5,6,4,3]
+
+split 4 [4,1,2,3]
+
+split 14 [1,2,3,4,5,6,4,3]
+a resposta para o ultimo caso poderia ser melhor.
+<br>
+
+## Splitall
+Usando funçoes já definidas:
+
+~~~Haskell
+splitAll :: Eq a => a -> [a] -> [[a]]
+splitAll sep lista = let
+    res = split sep lista
+
+    segundo [_,a] = a
+    
+    tamanho [] = 0
+    tamanho (a:as) = 1 + tamanho as
+    
+    in if (tamanho res) == 1 
+        then res 
+        else (head res) : (splitAll sep (segundo res))
+~~~
+No let eu misturo variaveis locais e funcoes locais - ficou um pouco confuso. Seria melhor definir as funcoes fora.
+
+splitAll 5 [1,2,3,4,5,6,5,4]
+
+splitAll 5 [1,2,3,4,5,6,5,4,5]
+
+splitAll 5 [1,2,3,4,5,6,5,4,5,5]
+
+splitAll 15 [1,2,3,4,5,6,5,4,5,5]
+ultimos 2 casos poderiam ser melhores….
+</details>
