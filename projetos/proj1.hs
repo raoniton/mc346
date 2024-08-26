@@ -18,6 +18,12 @@ trocatodos 4 10 [1,2,3,5,6,7]
 trocatodos velho novo [] = []
 trocatodos velho novo (x:xs) = if x == velho then novo : trocatodos velho novo xs else x : trocatodos velho novo xs
 
+--versao com guards
+trocatodos' velho novo [] = []
+trocatodos' velho novo (x:xs)
+    | x == velho = novo : trocatodos' velho novo xs
+    | otherwise = x : trocatodos' velho novo xs
+
 {-
 2 - Implemente a função cumsum que dado uma lista de números retorna a lista com a soma cumulativa desses números. 
 (na lista retornarda, a posição i contem a soma dos elementos da lista original até a posição)
@@ -28,6 +34,19 @@ cumsum [4]
 cumsum [5,10,2,3]
 ==> [5,15,17,20]
 -}
+
+cumsum [] = 0:[]
+cumsum list = cumsum' 0 list
+    where cumsum' acum [] = [acum]
+          cumsum' acum (x:[]) = (acum + x):[]
+          cumsum' acum (x:xs) = (acum + x): cumsum' (acum + x) xs
+
+--versao com guards
+cumsum2 [] = 0:[]
+cumsum2 list = cumsum2' 0 list
+    where cumsum2' acum (x:xs)
+            | xs == [] = (acum + x): []
+            | otherwise = (acum + x): cumsum2' (acum + x) xs
 
 {-
 Detalhes
