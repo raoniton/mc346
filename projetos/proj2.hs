@@ -10,7 +10,8 @@ Compressão e descompressão de listas
 dada a lista ( de caracteres neste exemplo)
 
 "aaabbaasxbbbb"
-vamos definir uma lista comprimida cujos elementos são pares (item, quantidade) onde quantidade é o número de vezes que o item aparece sequenciamente na lista. Assim, a compressão dessa lista seria:
+vamos definir uma lista comprimida cujos elementos são pares (item, quantidade) onde quantidade é o número de vezes que o item aparece sequenciamente na lista. 
+Assim, a compressão dessa lista seria:
 
 [('a',3),('b',2),('a',2),('s',1),('x',1),('b',4)]
 Implemente a função: 
@@ -18,6 +19,15 @@ comprime :: Eq a => [a] -> [(a,Int)]
 comprime [3,3,3,4,5,6,5,5,5,5,7]
 => [(3,3),(4,1),(5,1),(6,1),(5,4),(7,1)]
 -}
+
+comprime :: Eq a => [a] -> [(a,Int)]
+comprime [] = []
+comprime list = comprime' list 0
+            where comprime' :: Eq a => [a] -> Int -> [(a, Int)]
+                  comprime' (x:xs) acc
+                    | xs == [] = (x, acc+1):[]
+                    | x == head xs = comprime' (xs) (acc+1)
+                    | otherwise = (x, acc+1): comprime' xs 0
 
 
 
@@ -29,6 +39,15 @@ descomprime [(3,3),(4,1),(5,1),(6,1),(5,4),(7,1)]
 
 -}
 
+descomprime :: Eq a => [(a, Int)] -> [a]
+descomprime [] = []
+descomprime list = descomprime' list 1
+      where descomprime' :: Eq a => [(a, Int)] -> Int -> [a]
+            descomprime' [] _ = []
+            descomprime' ((a,b):xs) acc
+                | b == 0 = []
+                | acc < b = a : descomprime' ((a,b):xs) (acc + 1)
+                | otherwise = a : descomprime' xs (1)
 
 
 
