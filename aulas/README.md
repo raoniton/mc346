@@ -1552,3 +1552,217 @@ produtoescalar  = foldr1 (+) $ zipWith (*)
 
 - implemente matmul que dado duas matrizes de formatos apropriados multiplica-as.
 </details>
+
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
+
+
+
+<details>
+  <summary>Aula 6 - Exemplos das funções vistas na Aula 5</summary>
+
+  # Aula 6
+##### [livro texto](http://learnyouahaskell.com/chapters) (cap 6)
+##### [haskell online](https://repl.it/languages/haskell)
+##### [outro - so compilado](https://www.jdoodle.com/execute-haskell-online)
+
+<br>
+
+
+# Mergesort
+
+~~~Haskell
+mergesort :: Ord a => [a] -> [a]
+
+mergesort [] = []
+mergesort [x] = [x]
+mergesort xs =
+  merge (mergesort x1) (mergesort x2)
+  where
+    n = (length xs) `div` 2
+    x1 = take n xs
+    x2 = drop n xs
+
+merge [] b = b
+merge a [] = a
+merge (a:as) (b:bs)
+  | a< b = a: (merge as (b:bs))
+  | otherwise = b : (merge (a:as) bs)
+drop e take ja estao implementados no prelude
+
+drop 0 x = x
+drop n (x:xs) = drop (n-1) xs
+
+take 0 _ = []
+take n (x:xs) = x:(take (n-1) xs)
+~~~
+<br>
+
+# Exemplos
+## Conta quantas vezes um item aparece numa lista
+
+~~~Haskell 
+conta item lista = sum $ map (\ x -> if x==item then 1 else 0) lista
+
+conta item lista = sum [if x==item then 1 else 0 | x<- lista]
+
+conta item lista = foldl (\ acc x -> if x==item then acc+1 else acc) 0 lista
+
+conta item lista = foldr (\ x res -> if (x==item then res+1 else res) 0 lista
+
+conta item = foldr (\ x res -> if (x==item then res+1 else res) 0       -- point-free
+~~~
+veja que a função anonima faz acesso ao parametro item isso significa que ele nao pode ser uma funçao externa (precisa ser local ou anonima)
+<br>
+
+# Membro e Remove
+~~~Haskell
+membro item lista = foldl (\ acc x -> x==item || acc) False lista
+
+
+remove it lista = foldr (\ x res -> if x==it then res else x:res) [] lista
+~~~
+ja existe a função elem e essa implementação de membro é meio feia - nao há necessidade de ir ate o fim da lista
+
+~~~Haskell
+membro item [] = False
+membro item (x:xs) 
+    | x == item = True
+    | otherwise = membro item xs
+~~~
+<br>
+
+# Reverte
+~~~Haskell
+reverte lista = rev' lista []
+    where 
+        rev' [] acc = acc
+        rev' (x:xs) acc = rev' xs (x:acc)
+    
+
+reverte lista = foldl (\ acc x -> x:acc) [] lista
+
+reverte = foldl (\ acc x -> x:acc) []    --- point free
+ 
+reverte = foldl (flip (:)) []            -- !!!!!!!
+~~~
+<br>
+
+# Soma cumulativa
+~~~Haskell
+-- recussao tradicional com um parametro a mais (soma ate agora)
+
+somacum (x:xs) = sc xs x
+    where
+        sc [] soma = [soma]
+        sc (a:as) soma = (soma+a) : (sc as (soma+a))
+
+
+
+-- com accumulador mas monta a lista ao contrario
+
+somacumx (x:xs) = scx xs [x]
+    where 
+        scx [] acc = acc
+        scx (x:xs) (a:as) = sc xs ((x+a):(a:as))
+
+
+somacum (x:xs) = reverse $ foldl comb [x] xs
+    where 
+        comb all@(x:xs) a = x+a:all
+~~~
+<br>
+
+# Todas as posicoes de um item numa lista
+
+~~~Haskell
+let lista1 = [2,3,1,4,5,4,3,4,6,1,1,0]
+
+
+-- tradicional 
+
+posicoes it [] = []
+posicoes it (x:xs) 
+    | x == it = 1:res
+    | otherwise = res
+    where 
+        res = map (1+) $ posicoes it xs
+
+-- foldl passando uma tupla (posicao autual e resultado) 
+
+posicoesx it lista = foldl comb (1,[]) lista
+    where 
+        comb (n,l) x 
+            | x == it = (n+1,n:l)
+            | otherwise = (n+1,l)
+
+posicoes it lista = reverse $ snd $ posicoesx it lista
+~~~
+<br>
+        
+# Transposta de uma matriz
+~~~Haskell
+let mat1 = [[1,2,3],[4,5,6],[7,8,9],[0,0,-1]]
+let mat1tr = [[1,4,7,0],[2,5,8,0],[3,6,9,-1]]
+
+
+-- caso recursivo tansp m = (map head m) : (transp (map tail m))
+-- caso base? quando a matriz para ser transposta é da forma [[],[],[],...,[]]
+
+transposta ([]:_) = []
+transposta mat = (map head mat) : (transposta (map tail mat))
+~~~
+<br>
+
+# Outra versão do transposta proposto por um aluno
+~~~Haskell
+-- caso base trnasposta de uma linha da uma coluna
+transposta [x] = map (\z -> [z]) x
+
+-- caso recursivo: insere os elementos da linha (l) no comeco das
+-- linhas da transposta
+transposta (l:ls) = zipWith (:) l (transposta ls)
+~~~
+<br>
+
+# Multiplicacao de duas matrizes
+
+~~~Haskell
+let m1 = [[1,2,3],[4,5,6]]
+let m2 = [[7,8],[9,10],[11,12]]
+let mresp = [[58,64],[139,154]] -- https://www.mathsisfun.com/algebra/matrix-multiplying.html
+    
+let m2transp = [[7,9,11],[8,10,12]]    
+    
+    
+prodesc l1 l2 = sum $ zipWith (*) l1 l2
+
+matmul' [] _ = []
+matmul' (x:xs) m2t = (map (prodesc x) m2t) : (matmul' xs m2t)
+
+
+matmul m1 m2 = matmul' m1 $ transposta m2
+~~~
+</details>
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
+
+
