@@ -12,8 +12,8 @@ dada a lista ( de caracteres neste exemplo)
 "aaabbaasxbbbb"
 vamos definir uma lista comprimida cujos elementos são pares (item, quantidade) onde quantidade é o número de vezes que o item aparece sequenciamente na lista. 
 Assim, a compressão dessa lista seria:
-
 [('a',3),('b',2),('a',2),('s',1),('x',1),('b',4)]
+
 Implemente a função: 
 comprime :: Eq a => [a] -> [(a,Int)]
 comprime [3,3,3,4,5,6,5,5,5,5,7]
