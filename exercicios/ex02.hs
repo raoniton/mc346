@@ -234,10 +234,21 @@ checkOrd (x:xs) = if [x] <= xs then checkOrd xs else False
 shiftr [1,2,3,4]
  ==> [4,1,2,3]        
  -}
-
+-- utilizei as funcoes "ultimo" do exercicios 5, e "semUlt" do exercicio 12
+shiftr [] = []
+shiftr (x:xs) =
+    let a = ultimo' (x:xs)
+        b = semUlt (x:xs)
+    in a : b
 
 ---------------------------------------------------------------------------------------
 -- 17) shiftr n lista (shift direita n vezes)
+-- utilizei a funcao shiftr do exercicio 16
+
+shiftr' n [] = []
+shiftr' n (x:xs)
+    | (n == 0) = (x:xs)
+    | otherwise = shiftr' (n - 1) (shiftr (x:xs))
 
 
 ---------------------------------------------------------------------------------------
@@ -313,12 +324,30 @@ trocaN old new n (x:xs) = if old == x then new : trocaN old new (n-1) xs else x 
 ---------------------------------------------------------------------------------------
 
 -- 1) posicoes - dado um item e uma lista, retorna uma lista com todas as posicoes (primeiro elemento esta na posição 1) do item na lista
+--posicoes _ [] = []
+posicoes item list = posic item list 1
+    where   posic item [] acc = []
+            posic item (x:xs) acc 
+                | item == x = (acc,x) : posic item xs (acc+1)
+                | otherwise = posic item xs (acc+1)
+                
 
 -- 2) split - dado um item e uma lista retorna uma lista de listas, todos os elementos da lista antes do item (a primeira vez que ele aparece) e todos depois
 {-
 split "qwertyuiopoiuyt" 't' 
 -- ==> ["qwer", "yuiopoiuyt"]
 -}
+
+
+--texto [] = []
+--texto list = list
+--
+--
+--split list item = split' list item 0
+--    where   split' [] item acc = []
+--            split' (x:xs) item acc
+--                | item == x = x : split' xs item 0
+--                | otherwise = xs
 
 -- 3) splitall - mesma coisa que o split mas retorna todas as sublistas
 --splitall "qwertyuiopoiuytxxt" 't' 
