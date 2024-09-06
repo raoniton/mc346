@@ -159,6 +159,13 @@ reverte' (x:xs)
 reverte'' list = reverte' [x | x <- list]
 
 
+--neste caso, recursão com acumulador torna a função linear
+-- [1,2,3,4], 2:1:[]
+reverte''' l = reverte' l []
+   where 
+     reverte' [] acc = acc
+     reverte' (x:xs) acc = reverte' xs (x:acc)
+
 -- 10) tradicional fold right
 {-rev1 [] = []
 rev1 (x:xs) = rev1 xs ++ [x]
@@ -209,18 +216,26 @@ somaPosPar list = somaPosPar' list 1 0
 {-
 intercala1 [1,2,3] [4,5,6,7,8]
  ==> [1,4,2,5,3,6]
-intercala2 [1,2,3] [4,5,6,7,8]
- ==>  [1,4,2,5,3,6,7,8]
--}                      
-{- AINDA NAO FUNCIONA
+-}                 
+-- essa primeira versao intercala enquanto as duas listas tem elementos, se uma delas 
+-- acabar primeiro, interrompe a intercalacao retornando vazio.
 intercala1 list1 list2 = intercala list1 list2 0
-    where   intercala [] [] i = [] 
+    where   intercala [] list2 i = []
+            intercala list1 [] i = []
             intercala (x:xs) (y:ys) i 
-                | x == [] = (y) : intercala [] (ys) (i+1)
-                | y == [] = (x) : intercala (xs) [] (i+1)
                 | i `mod` 2 == 0 = (x):intercala xs (y:ys) (i+1)
                 | otherwise = (y):intercala (x:xs) (ys) (i+1)
--}
+{-
+intercala2 [1,2,3] [4,5,6,7,8]
+ ==>  [1,4,2,5,3,6,7,8]
+-}   
+intercala2 list1 list2 = intercala list1 list2 0
+    where   intercala list1 [] i = list1 
+            intercala [] list2 i = list2
+            intercala (x:xs) (y:ys) i 
+                | i `mod` 2 == 0 = (x):intercala xs (y:ys) (i+1)
+                | otherwise = (y):intercala (x:xs) (ys) (i+1)
+
 
 ---------------------------------------------------------------------------------------
 -- 15) a lista já esta ordenada? Retorna True ou False
@@ -253,11 +268,21 @@ shiftr' n (x:xs)
 
 ---------------------------------------------------------------------------------------
 -- 18) shift left
+{-
+shiftr [1,2,3,4]
+ ==> [2,3,4,1]        
+ -}
+shiftl [] = []
+shiftl (x:xs)
+    | otherwise = xs++[x]
 
 
 ---------------------------------------------------------------------------------------
 -- 19) shift left n vezes
-
+shiftl' n [] = []
+shiftl' n (x:xs)
+    | (n == 0) = (x:xs)
+    | otherwise = shiftl' (n-1) (shiftl(x:xs)) 
 
 ---------------------------------------------------------------------------------------
 -- 20) remove o item da lista (1 vez só)
@@ -268,6 +293,10 @@ remove1 4 [2,3,4,5,4,3,2,1]
 remove1 item [] = []
 remove1 item (x:xs) = if item == x then xs else x : remove1 item xs
 
+remove1' item [] = []
+remove1' item (x:xs) 
+    | item == x = xs
+    | otherwise = x:remove1 item xs
 
 ---------------------------------------------------------------------------------------
 -- 21) remove item da lista (todas as vezes)
@@ -279,6 +308,11 @@ removeall item [] = []
 removeall item (x:xs) = if item == x then removeall item xs else x : removeall item xs
 
 
+removeall' item [] = []
+removeall' item (x:xs)
+    | item == x = removeall' item xs
+    | otherwise = x : removeall' item xs
+
 ---------------------------------------------------------------------------------------
 -- 22) remove item da lista n (as primeiras n vezes)
 {-
@@ -289,12 +323,21 @@ removen num qtd [] = []
 removen num 0 list = list
 removen num qtd (x:xs) = if num == x then removen num (qtd-1) xs else x : (removen num qtd xs)
 
+removen' item acc [] = []
+removen' item acc (x:xs)
+    | acc == 0 = (x:xs)
+    | item == x = removen' item (acc-1) xs 
+    | otherwise = x : (removen' item acc xs)
 
 ---------------------------------------------------------------------------------------
 -- 23) remove item da lista (a ultima vez que ele aparece) **
---removeUlt item pos [] = []
-
-
+removeUlt item [] = []
+removeUlt item list = reverte''' (removeUltAux item (reverte''' list))
+                where removeUltAux item [] = []
+                      removeUltAux item (x:xs) 
+                            | x == item = xs
+                            | otherwise = x: removeUltAux item xs
+        
 ---------------------------------------------------------------------------------------
 -- 24) troca velho por novo na lista (1 so vez)
 {-
@@ -328,30 +371,44 @@ trocaN old new n (x:xs) = if old == x then new : trocaN old new (n-1) xs else x 
 posicoes item list = posic item list 1
     where   posic item [] acc = []
             posic item (x:xs) acc 
-                | item == x = (acc,x) : posic item xs (acc+1)
+                | item == x = (acc) : posic item xs (acc+1)
                 | otherwise = posic item xs (acc+1)
-                
+
 
 -- 2) split - dado um item e uma lista retorna uma lista de listas, todos os elementos da lista antes do item (a primeira vez que ele aparece) e todos depois
 {-
 split "qwertyuiopoiuyt" 't' 
 -- ==> ["qwer", "yuiopoiuyt"]
 -}
-
-
---texto [] = []
---texto list = list
---
---
---split list item = split' list item 0
---    where   split' [] item acc = []
---            split' (x:xs) item acc
---                | item == x = x : split' xs item 0
---                | otherwise = xs
+--split [] _ = []
+split list c = splitAux list c []
+        where splitAux [] c acc = []
+              splitAux (x:xs) c acc 
+                | x == c = (reverte''' acc):[xs]
+                | otherwise = splitAux xs c (x:acc)
 
 -- 3) splitall - mesma coisa que o split mas retorna todas as sublistas
---splitall "qwertyuiopoiuytxxt" 't' 
--- ==> ["qwer", "yuiopoiuy", "xx", ""]  ou  ["qwer", "yuiopoiuy", "xx"]
--- drop n lista - a lista sem os n primeiros elementos - essa função já esta implementada no Prelude
+{-
+splitall "qwertyuiopoiuytxxt" 't' 
+==> ["qwer", "yuiopoiuy", "xx", ""]  ou  ["qwer", "yuiopoiuy", "xx"]
+-}
 
--- take n lista - os primeiros n elementos da lista - essa função já esta implementada no Prelude
+splitall list c = splitAux list c []
+        where splitAux [] c acc = "":[]
+              splitAux (x:xs) c acc 
+                | x == c = (reverte''' acc) : splitAux xs c []
+                | otherwise = splitAux xs c (x:acc)
+
+
+
+-- 4) drop n lista - a lista sem os n primeiros elementos - essa função já esta implementada no Prelude
+drop' _ [] = []
+drop' n (x:xs)
+    | n == 0 = xs
+    | otherwise = drop' (n-1) xs
+
+-- 5) take n lista - os primeiros n elementos da lista - essa função já esta implementada no Prelude
+take' _ [] = []
+take' n (x:xs)
+    | n == 0 = []
+    | otherwise = x:take (n-1) xs
