@@ -1432,6 +1432,8 @@ map f [] = []
 map f (a:as) = f a : (map f as)
 
 map (5-) [10,8..0]
+~~~
+~~~Haskell
 filter :: (a -> Bool) -> [a] -> [a]  
 filter _ [] = []  
 filter p (x:xs)   
@@ -1751,6 +1753,171 @@ matmul' (x:xs) m2t = (map (prodesc x) m2t) : (matmul' xs m2t)
 
 
 matmul m1 m2 = matmul' m1 $ transposta m2
+~~~
+</details>
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
+
+<details>
+  <summary>Aula 7 - Multiplicação de Matrizes, Lazy Evaluation, Criando os Próprios Tipos</summary>
+
+  # Aula 7
+livro texto (cap 8 Algebraic data types intro e Recursive data structures apenas)
+
+##### [livro texto](http://learnyouahaskell.com/chapters) (cap 8)
+##### [haskell online](https://replit.com/@mc346b)
+
+# Multiplicacao de matrizes
+##### original (ultima aula)
+
+~~~Haskell
+prodesc l1 l2 = sum $ zipWith (*) l1 l2
+
+matmul m1 m2 = matmul' m1 $ transposta m2
+
+matmul' [] _ = []
+matmul' (x:xs) m2t = (map (prodesc x) m2t) : (matmul' xs m2t)
+~~~
+
+com o duplo map:
+~~~Haskell
+matmul' m1 m2t = map ('x -> (map (prodesc x) m2t) m1
+~~~
+<br>
+
+# lazy evaluation
+`[1..1000]` não cria uma lista de 1000 elementos, cria um objeto que dá um elemento por vez quando recebe o pedido, chamados `thunk`. A vantagem é que isso nao aloca memoria para 1000 números
+
+`[7..]` é um thunk que gera 7, depois 8, depois 9, etc mas não aloca memoria para uma lista infinita
+
+`map (1+) [7..]` nao roda, cria apenas uma promessa de rodar. Se alguem predir pelo primeiro valor, o thunk retorna 8, e o resto continua um thunk
+
+`aux (x:xs) =  ...` é uma operação que pede o 1o elemento de um thunk (que foi passado para a função aux. o xs continua um thunk!!!
+
+### tudo em haskell sao thunks, promessas de computação.
+
+só na hora de print (no repl) é que a promessa é executada. Ha outros contextos que executam os thunks - `strict` (em oposicao a lazy)
+
+~~~Haskell
+a = [1..]
+take  3 a
+b = map (5+)  a  -- nao roda!!
+let {double [] = [] ; double (x:xs) = (2*x):(double xs)}
+c = double b
+d = take 3 c
+d
+~~~
+
+de vez em quando, thunks são jogados fora antes de computar o seu valor. O `take` é implementado como
+
+~~~Haskell
+take 0 resto = []
+take n (x:xs) = x: take (n-1) xs
+~~~
+- o thunk resto na primeira regra é jogado fora! (garbage collected)
+- na hora de execução a segunda regra pede o 1o elemento do thunk `(x:xs)` e monta o `take (n-1) xs`
+
+~~~Haskell
+posicoes it lista = filter (>0) $ 
+    zipWith (\ x p -> if (x==it) then p else 0) lista [1..]
+~~~
+<br> 
+
+# Criando seus proprios tipos
+
+~~~Haskell
+data
+
+data Ponto = Ponto Float Float -- x e y de um ponto
+data Figura = Circulo Ponto Float | Retangulo Ponto Ponto
+
+area (Circulo _ r) = 2 * 3.14 * r
+area (Retangulo (Ponto xa ya) (Ponto xb yb)) = abs ((ya-yb)*(xa-xb))
+data Ponto = Ponto Float Float deriving (Eq,Read,Show)
+~~~
+o `deriving (Eq,Show,Read)` extende trivialmente o `==` e as funções `show` e `read` para que o novo tipo `Ponto` seja subtipos de `Eq, Show e Read`
+
+
+Definição de tipos pode conter variaveis de tipo
+
+~~~Haskell
+data Tree a = Vazia | No a (Tree a) (Tree a) deriving (Eq,Show,Read)
+~~~
+
+Isso define uma arvore binária de a seja o que for a
+<br>
+
+
+# Pattern matching
+O pattern matching funciona nos tipos construidos pelo programador
+
+~~~Haskell
+soma Vazia = 0
+soma (No x ae ad) = soma ae + soma ad + x
+~~~
+
+~~~Haskell
+distancia (Ponto x y) (Ponto a b) = sqrt (dx**2 + dy**2)
+        where  dx = x - a
+               dy = y - b
+~~~
+
+# Exercicios
+arvore de busca binaria (abb): o no da raiz é maior que todos nós a esquerda e menor que todos nós a direita, e isso vale recursivamente.
+
+data Tree a = Vazia | No a (Tree a) (Tree a) deriving (Eq,Show,Read)
+- acha um item numa arvore de busca binaria (abb)
+
+- verifica se uma arvore é um abb
+
+~~~Haskell
+isAbb :: Ord a => Tree a -> Bool 
+
+
+isAbb Vazia  = True
+isAbb (No _ Vazia Vazia) = True
+isAbb (No x Vazia ad) = isAbb ad && x < menor ad
+isAbb (No x ae Vazia) = isAbb ae && x > maior ae
+isAbb (No x ae ad) = isAbb ae && isAbb ad && x < menor ad && x > maior ae
+
+maior (No x _ Vazia) = x
+maior (No x _ ad) = maior ad
+
+menor (No x Vazia _) = x
+menor (No x ae _) = menor ae
+~~~
+
+- insere um item numa abb
+
+- remove um item de uma abb
+
+- calcula a profundidade maxima de uma abb
+
+- coverte uma abb numa lista em ordem infixa (arvore-esquerda, no, arvore-direita)
+
+- converte uma abb numa lista em ordem prefixa (no, ae, ad)
+
+- converte uma lista em uma abb
+
+- converteparaabb :: Ord a => [a] -> Tree a
+
+~~~Haskell
+converteparaabb lista = foldl insereabb' Vazia lista
+    where 
+        insereabb' Vazia x = No x Vazia Vazia
+        insereabb' (No y ae ad) x
+            | x == y =  No y ae ad
+            | x < y  =  No y (insereabb' ae x) ad
+            | otherwise = No y ae (insereabb' ad x)
 ~~~
 </details>
 
