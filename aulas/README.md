@@ -1933,3 +1933,600 @@ converteparaabb lista = foldl insereabb' Vazia lista
 -->
 
 
+<details>
+  <summary>Aula 8 - Composição de Funções, Módulos, Base Packages: Data.List, Data.Char, etc, I/O </summary>
+
+# Aula 8
+#### [livro texto](http://learnyouahaskell.com/chapters) (cap 7)
+#### [Haskell online](https://repl.it/languages/haskell)
+#### [compilado](https://www.jdoodle.com/execute-haskell-online)
+
+# Faltou em funções de alto nivel
+~~~
+f (g (h x)))
+
+f $ g $ h x
+
+(f . g . h) x
+~~~
+`.` é a composição de 2 funcoes, normalmente usado em map
+
+~~~Haskell
+map (f . g) lista
+
+map (\x -> f (g x)) lista
+~~~
+<br> 
+
+# da aula passada
+~~~Haskell
+data Tree a = Vazia | No a (Tree a) (Tree a) deriving (Eq,Show,Read)
+
+insereabb :: Ord a => a -> Tree a -> Tree a
+
+insereabb x Vazia = No x Vazia Vazia
+insereabb x (No y ae ad)
+    | x==y = No y ae ad
+    | x<y  = No y (insereabb x ae) ad
+    | x>y  = No y ae (insereabb x ad)
+    
+listatoabb :: Ord a => [a] -> Tree a
+
+listatoabb lst = foldl (flip insereabb) Vazia lst
+~~~
+<br>
+
+# Modulos
+~~~Haskell
+import Data.List  -- tudo !!!
+
+import Data.List (nub,sort)  -- apenas
+
+import qualified Data.List as DL -- qualificado
+
+DL.sort
+~~~
+<br>
+
+# base packages
+https://hackage.haskell.org/package/base
+<br>
+<br>
+
+# Data.List
+De uma olhada em [Data.List](https://hackage.haskell.org/package/base-4.20.0.1/docs/Data-List.html)
+
+- `fold, map, filter, elem,` etc
+
+- `sum, maximum`
+
+- `!!` - acesso a um elemento (indexado apartir do 0)
+
+- `zip, zipWith`
+
+- `lines` - divide um stringão em linhas
+
+- `words` - divide um string em palavras (igual ao split() do python)
+
+- `unlines e unwords` - inverso das funcoes acima
+
+- `sort`
+
+- `nub` - remove duplicadas, `partition`
+
+- `sortBy deleteBy groupBy nubBy`
+
+- operações em conjuntos: `union, //` (set difference) etc
+<br>
+
+# Data.Map.Strict
+containers: https://hackage.haskell.org/package/containers
+
+intro https://haskell-containers.readthedocs.io/en/latest/
+
+https://haskell-containers.readthedocs.io/en/latest/map.html
+
+dicionários (implementados como arvores binarias balanceadas, e tempo de acesso = **O(logn)**
+
+[Data.Map.Strict](https://hackage.haskell.org/package/containers-0.7/docs/Data-Map-Strict.html)
+
+- `empty` - dicionario vazio
+
+- `fromList ::  Ord k => [(k, a)] -> Map k a` - lista de duplas para um dicionário
+
+- `fromListWith :: Ord k => (a -> a -> a) -> [(k, a)] -> Map k a` - o primeiro argumento é uma função que combina 2 valores que tiverem a mesma chave
+
+- `insert Ord k => k -> a -> Map k a -> Map k a` - insere num dicionário
+
+- `insertWith` - função de combinação entre valor velho e novo.
+  - Insert with a function, combining new value and old value. insertWith f key value mp will insert the pair (key, value) into mp if key does not exist in the map. If the key does exist, the function will insert the pair (key, f new_value old_value).
+
+- `delete Ord k => k -> Map k a -> Map k a`
+
+- `lookup :: Ord k => k -> Map k a -> Maybe a` - **(a ser discutido na aula que vem)**
+
+- `member Ord k => k -> Map k a -> Bool` - Retorna um booleano
+
+`map :: (a -> b) -> Map k a -> Map k b` - map nos valores
+
+- mapWithKey :: (k -> a -> b) -> Map k a -> Map k b` - map que recebe a chave e transforma os valores
+
+- `elems :: Map k a -> [a]`
+
+- `keys :: Map k a -> [k]`
+
+- `foldr` e `foldl` - funciona (com valores)
+
+- import qualified `Data.Map.Strict as Map`
+
+- `insertWith :: Ord k => (a -> a -> a) -> k -> a -> Map k a -> Map k a`
+<br>
+
+# Data.char
+https://hackage.haskell.org/package/base-4.20.0.1/docs/Data-Char.html
+<br>
+<br>
+# Exercicos (resposta)
+~~~Haskell
+data Tree a = Vazia | No a (Tree a) (Tree a) deriving (Eq,Show,Read)
+
+removeabb :: Ord a => a -> Tree a -> Tree a
+
+removeabb _ Vazia = Vazia
+removeabb x (No y ae ad) 
+    | x < y  = No y (removeabb x ae) ad
+    | x > y  = No y ae (removeabb x ad)
+    | x == y = aux1 x ae ad
+    
+
+aux1 x ae ad 
+    | ae == Vazia = ad
+    | otherwise = No novaraiz (removeabb novaraiz ae) ad
+    | 
+    where
+        novaraiz = omaior ae
+    
+omaior (No x _ Vazia) = x
+omaior (No _ _ ad) = omaior ad
+~~~
+essa é uma solução (deselegante).
+
+- o removeabb cuida dos casos simples
+- aux1 cuida do caso complicado (remover uma raiz de uma arvore com os 2 lados
+a solucao é deselegante por razoes sintaticas (poderia tudo esta como funções auxiliares) mas principalmente porque vc tem que andar pela arvore a esquerda 2 vezes, para achar o maior e para remove-lo
+
+podemos fazer isso de uma so vez
+
+~~~Haskell
+acha_remove_maior :: Ord a => Tree a -> (a,Tree a)
+
+acha_remove_maior (No x ae Vazia) = (x,ae)
+acha_remove_maior (No x ae ad) = (maior, No x ae nova_ad)
+    where
+        (maior,nova_ad) = acha_removemaior ad
+~~~
+
+agora aux1 fica
+
+~~~Haskell
+aux1 x ae ad 
+    | ae == Vazia = ad
+    | otherwise = No nova_raiz ae nova_ad
+    where
+        (nova_raiz,nova_ad) = acha_removemaior ad
+~~~
+melhor ainda é nao definir `aux1` e simplesmente colocar a expressão no linha do x==y
+
+solução final:
+
+~~~Haskell
+removeabb :: Ord a => a -> Tree a -> Tree a
+
+removeabb _ Vazia = Vazia
+removeabb x (No y ae ad) 
+    | x < y  = No y (removeabb x ae) ad
+    | x > y  = No y ae (removeabb x ad)
+    | x == y && ae == Vazia = ad
+    | otherwise =  No nova_raiz ae nova_ad
+    where
+        (nova_raiz,nova_ad) = acha_removemaior ad
+~~~
+<br>
+
+# I/O primeira parte
+ainda sem ler ou imprimir
+
+- `show x` apenas converte x p/ string
+
+- `read x :: Int` para converter um string x para inteiro
+
+- `read x :: Float` para converter p/ float
+
+- funções `lines` para quebrar um string em linhas e `words` para quebrar uma linha nos brancos
+
+- funçoes `unlines` e `unwords` para montar o string final
+
+~~~Haskell
+read "  8  " :: Int
+
+read "  8  " :: Float 
+
+show 9.876
+~~~
+</details>
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
+
+
+<details>
+  <summary>Aula 9 - Monads, Maybe, Containers, Functor(monoid), applicative, monad, >>=, return, <-, do, I/O</summary>
+    
+  # Aula 9 Monads
+#### [livro texto](http://learnyouahaskell.com/chapters) (cap 11 e 9)
+#### [Haskell online](https://repl.it/@mc346b)
+#### [Haskell - compilado](https://www.jdoodle.com/execute-haskell-online)
+
+# Maybe
+
+`data Maybe a = Nothing | Just a`
+Resultado de algumas funções que podem não ter resultado
+~~~Haskell
+:m + Data.List
+
+find (>4) [1,2,3,4,5,6,7]
+
+find (>14) [1,2,3,4,5,6,7]
+import Data.Map.Strict as M
+
+let dd =  M.fromList [("a",3),("b",5),("g",8)]
+
+M.lookup "b" dd
+
+M.lookup "f" dd
+~~~
+<br>
+
+# Funções do Maybe
+[Maybe no hackage](http://hackage.haskell.org/package/base-4.11.1.0/docs/Data-Maybe.html)
+
+<br><br>
+
+# Containers
+Um super tipo que contem um ou mais dados de um tipo interno (ou mais do que um tipo interno) ou nenhum dado.
+
+- lista é um container que pode conter **mais de um** dado de **um** só tipo interno
+
+- Map é um container que pode conter **mais do que um** dado de 2 tipos internos (chave - valor)
+
+- Maybe é um container que so contem **um dado** de **um** tipo
+<br>
+
+#Maybe como container
+O `Just` a é o “valor correto” e `Nothing` é o valor errado. Eu gostaria de poder continuar processando um Maybe enquanto o valor esta “correto”
+
+~~~Haskell
+fmap (*5) (Just 6)
+
+fmap (*5) Nothing
+~~~
+<br>
+
+# Functor (Monoid)
+Um container é um `functor` se ele implementa a função `fmap`
+
+~~~Haskell
+:t fmap
+
+:t map
+~~~
+
+fmap aplica uma função unária que funciona no dado de dentro, no container como um todo.
+
+fmap é muito parecido com o **map**, ou na verdade, o container **lista** é um functor!!
+
+O fmap aplica uma função que funciona no tipo de interno para dentro do container
+
+Se voce esta definindo o container (tipo), vc precisa definir como o fmap funciona nele. O fmap do maybe é
+
+~~~Haskell
+instance Functor Maybe where
+   fmap _ Nothing = Nothing
+   fmap f (Just something) = Just (f something)
+~~~
+
+Dicionario implementado como um abb
+~~~Haskell
+data Dic ch v = Vazio | No ch v (Dic ch v) (Dic ch v)
+-- dicionario implmentado como uma ABB
+
+instance Functor Dic where
+   fmap _ Vazio = Vazio
+   fmap f (No ch v ae ad) = No ch  (f v) (fmap f ae) (fmap f ad)
+~~~
+<br>
+
+
+# applicative
+Eu gostaria que:
+
+~~~
+(Just 7) + (Just 3) ==> Just 10
+
+(Just 7) + Nothing ==> Nothing
+~~~
+
+Um container é um `applicative` se ele permite aplicar uma função binaria que funciona no tipo interno e aplica-la em dois containers
+
+Infelizmente a notação de um aplicative é esquisita. Eu acho que isso deriva do fato que nao há funções binarias em haskell, só funções unárias.
+
+~~~Haskell
+(+) <$> (Just 7) <*> (Just 3)
+
+(+) <$> (Just 7) <*> Nothing
+~~~
+
+o `<$>` é um operador que combina uma funcao (do tipo interno) e um container e retorna “algo.” O `<*>` é outro operador que combina o “algo” com o container e retorna um container com os elementos internos sendo o resultado da aplicação da função binaria.
+
+A lista é também é um applicative:
+
+~~~
+(+) <$> [1,2,3,4] <*> [10,100]
+
+[11,101,12,102,13,103,14,104]
+~~~
+
+veja que o aplicative aplica a função binaria em todos os pares dos dois containers (o fmap aplica a função em todos so elementos do container)
+
+# monad
+Um container é uma monad se ele implementa (entre outras coisas) a função infixa >>= (operador de bind infixo ) que remove o dado de um container para aplica-lo em uma função que esta esperando o tipo interno e retorna um container com o resultado
+
+~~~Haskell
+:t (>>=)
+
+~~~
+
+`(Just 8) >>= (\x -> if odd x then Nothing else (Just (2*x+1)) )`
+
+Note que a função anonima recebe um inteiro e retorna um inteiro dentro do container (Maybe)
+
+Listas são também monadas, que são combinadas com uma operacao de concatenação
+
+~~~
+[1,2,3] >>= (\x -> if odd x then [x] else [])
+[4]
+~~~
+
+Note que a funcao anonima recebe um inteiro e retorna um inteiro dentro do container
+
+# bind (>>=) como composicao
+pense em duas funçoes `f :: a -> b` e `g :: b -> c`
+
+uma coisa importante/central em programação funcional é compor essas funçoes
+~~~Haskell
+g (f x)
+
+g $ f x
+~~~
+
+agora assuma uma função **f'** que faz o que **f** faz mas coloca o resultado num container (por exemplo o resultado e um log das operações)
+
+**g'** também gera um log.
+
+mas como compor f' e g'?
+
+é isso que o >>= faz
+
+f' x >>= g'
+o `>>=` é um tipo de composição de função. `f' :: a -> t b` e `g' :: b -> t` c onde t é um container. Entao
+
+f' x >>= g'
+
+combina essas funcoes. f' x retorna algo no container, o bind >>= remove do container (da forma correta) e da esse valor para o g' que retrona um conrainer. O bind depois **combina esses 2 containers** da forma apropriada.
+<br>
+
+# return
+Monad define também a função `return` que coloca um valor dentro do container
+
+~~~Haskell
+mae :: Pessoa -> Maybe Pessoa
+pai :: Pessoa -> Maybe Pessoa
+
+avomaternal p = return p >>= mae >>= pai
+~~~
+-- ou
+~~~Haskell
+avomaternal p = mae p >>= pai
+~~~
+
+Maybe é uma monada. Veja a definição dos dois operadores `>>=` e `return`
+
+~~~Haskell
+instance Monad Maybe where
+    Nothing  >>= f = Nothing
+    (Just x) >>= f = f x
+    return x       = Just x
+~~~
+<br>
+
+# Notação `do`
+Monadas vão ser importantes. Todo o I/O vai ser relacionado com monadas mas ela é mais importante que isso.
+
+`do` é uma notação mais conveniente para monadas
+
+~~~Haskell
+avomaternal p = do 
+                 m <- mae p
+                 pai m
+~~~
+
+A `<-` retira o valor da monada.
+
+A notação `do` parece um programa “tradicional” com o `<-` como operador de atribuição
+
+~~~Haskell
+filtra f l = do 
+               x <- l
+               if f x then [x] else []
+
+filtra2 f l = [ x | x <- l, f x]
+
+filtra  odd [1,2,3,4]
+filtra2 odd [1,2,3,4]
+~~~
+
+neste caso o **do** faz um loop pela lista! O resultado de cada passo é uma lista ([x] ou []) e o bind da lista faz um `concat` (concatena uma lista de listas)
+
+~~~Haskell
+concat [ [2], [], [1,2,3,4], [7,7], [], [] ]
+~~~
+<br>
+
+# I/O
+Toda operação de I/O esta dentro da monada `IO`
+
+~~~Haskell
+:t getLine
+
+:t putStrLn
+~~~
+
+- `getLine` lê uma linha e retorna o string dentro da monada IO
+
+- `getContents` lê tudo
+
+- `putStrLn` recebe um string, imprime ele, e retorna uma tupla vazia dentro de IO
+  
+
+Uma forma genérica para programas haskell (sem interação)
+
+~~~Haskell
+main = do 
+       dados <- getContent
+       let saida = proc dados
+       putStrLn saida
+~~~
+
+- `print` converte argumentos para string e imprime
+
+- `show` apenas converte p/ string
+
+- `read x :: Int` para converter um sting para inteiros
+
+- `read x :: Float` para converter p/ float
+
+- funções `lines` para quebrar um string em linhas e `words` para quebrar uma linha nos brancos
+
+- funçoes `unlines` e `unwords` para montar o string final
+
+..
+</details>
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
+<details>
+  <summary>Aula 10 - Exemplo de uso de monads</summary>
+
+# Aula 10
+#### [livro texto](https://learnyouahaskell.github.io/) (cap 11 e 9)
+#### [Haskell - compilado](https://www.jdoodle.com/execute-haskell-online)
+
+# Exemplo de uso de monads
+~~~Haskell
+solquadratica a b c = let
+    delta = sqrt (b**2 - 4 *a * c)
+    in ((-b + delta) / 2,   (-b - delta) / 2)
+~~~
+<br>
+
+agora vamos assumir que a, b e c vem de computacoes que geram maybe, e tambem que para deltas negativos devemos retornar um Nothing
+
+~~~Haskell
+import Data.Maybe 
+
+solquadratica a b c = if isNothing a || isNothing b || isNothing c then Nothing
+                      else let
+                          aa = fromJust a
+                          bb = fromJust b
+                          cc = fromJust c
+                          delta = (bb**2 - 4 * aa * cc)
+                          in if delta < 0 then Nothing
+                             else Just ((-bb + sqrt delta)/2, (-bb - sqrt delta)/2)
+~~~
+<br>
+
+usando monadas
+~~~Haskell
+solquadratica2 a b c = do
+                aa <- a
+                bb <- b
+                cc <- c
+                let mysqrt x = if x<0 then Nothing else Just (sqrt x)
+                sdelta <- mysqrt (bb**2 - 4 * aa * cc)
+                return ( (-bb+sdelta)/2,  (-bb-sdelta)/2 )
+~~~
+<br>
+
+# Outras monadas
+- Maybe são computacoes que pode dar errado
+
+- Listas são computacoes que geram 0 , 1 ou mais resultados!!
+
+- OI monad são computacoes que fazem I/O
+<br>
+
+# state monad
+~~~Haskell
+uma aproximacao
+
+simulador g = let (n,g1) = random g
+                  (b,g2) = random g1
+                  (c,g3) = random g2
+                  (m,g4) = random g3
+                    in simul' n b c m
+~~~
+
+voce quer uma monada que contem (valor, estado) e o do cuida para autializar o estado a cada chamada
+
+~~~Haskell
+simuladorx g = do n <- random 
+                 b <-  random
+                 c <- random 
+                 m <- random 
+                 return (simul' n b c m)
+~~~
+<br>
+
+# reader monad
+todas computacoes tem acesso a dados comuns imutaveis
+<br><br>
+
+# writer monad
+cada computacao gera um stream de dados (por exemplo log)
+<br><br>
+
+# call with continuation (??)
+https://en.wikipedia.org/wiki/Call-with-current-continuation
+<br><br>
+
+# referencias futuras
+https://wiki.haskell.org/All_About_Monads
+
+proximos passos em haskell https://book.realworldhaskell.org
+</details>
