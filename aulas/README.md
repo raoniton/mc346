@@ -2530,3 +2530,278 @@ https://wiki.haskell.org/All_About_Monads
 
 proximos passos em haskell https://book.realworldhaskell.org
 </details>
+
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
+<br>
+
+[![Prolog](https://github.com/raoniton/mc346/blob/main/img/logo_prolog.png)](https://www.swi-prolog.org/)
+<details>
+  <summary>Aula 11 - Prolog - Introdução</summary>
+  
+  # Aula 11 Prolog
+
+##### [Livro texto pagina](https://en.wikibooks.org/wiki/Prolog) 1 (Introduction) e 2 (rules)
+
+##### [Apostila do Prof Joao Meidanis](https://www.ic.unicamp.br/~meidanis/courses/mc336/2011s2/prolog/apostila-prolog.pdf).
+
+##### [Para baixar para a sua maquina](https://www.swi-prolog.org/download/stable) 
+
+##### [Prolog interativo](https://swish.swi-prolog.org/)
+<br>
+
+# Prolog
+## história
+- criado em 1972 na França
+- programação em logica
+- declara o que uma solução deva satisfazer e o programa procura por essa solução
+- ganhou proeminência com o livro Programming in Prolog by Clocksin e Mellish nos anos 80
+- importante para Inteligencia Artificial com a ideia de representação do conhecimento
+- desenvolvido principalmente na Europa para se contrapor a preferencia americana em usar Lisp para IA (nos anos 70 e 80)
+- virou a linguagem central da [fifth generation computers](https://en.wikipedia.org/wiki/Fifth_Generation_Computer_Systems) do Japão em 1982
+- varias implementações (diferente de Haskell, ou Python, ou Perl, ou Lua, R, Rust, Go, etc ). Uma linguagem nao é uma implementação, mas uma especificação, com várias implementações (como C, Java, Lisp, e outras).
+- há uma especificação, ISO Prolog, mas as implementações normalmente fazem modificações e extensões e acabam se tornando incompatível.
+<br>
+
+## Conceitos básicos
+- banco de dados (fatos e regras)
+- query
+<br>
+
+## banco de dados/fatos/conhecimento
+knowledge base
+~~~Prolog
+human(david).
+human(john).
+human(suzie).
+human(eliza).
+man(david).
+man(john).
+woman(suzie).
+woman(eliza).
+parent(david, john).
+parent(john, eliza).
+parent(suzie, eliza).
+~~~
+`david` e `john` são um novo tipo de dado: `símbolo` ou `átomos`. Não são strings, são nomes, como nomes de variavies e funções em outras linguagens
+
+Símbolos sao sequencias de letras e números começando com uma letra minúscula. Por incluir o underscore _ no meio. Ou são escritos como qualquer sequencia de caracteres entre aspas simples **'4ever'** ou **'abd cde?'**
+
+`human` e `man` são também símbolos. Mas nesse contexto são chamados de `predicados`.
+
+`david` e `john` são `termos`
+
+`human(david)`. é um `fato`
+
+Fatos sao um predicado com 0, 1 ou mais termos, terminado por um .
+<br>
+
+## query
+`?- human(eliza).` - isto é uma pergunta.
+a resposta é 
+`Yes` ou `true`
+
+`?- human(tereza)`
+a resposta é 
+`No` ou `false`
+
+Outra pergunta:
+`?- human(X)`. - `X` é uma `variável` pois começa com uma `maiúscula`.
+
+**Variáveis começam com uma letra maiúscula ou com o underscore _**
+
+a resposta é:
+`X = david`
+
+## outra resposta - backtracking
+no modo interativo do prolog, apertando o `;` ou no site de prolog interativo apertando o `next`
+
+`X = john`
+de novo:
+
+`X = suzie`
+e de novo
+
+`X = eliza`
+
+No site do prolog, neste caso o `next` deixa de aparecer com disponível. Num prolog interativo, apertando o `;` de novo da a resposta 
+`No`
+<br>
+
+## Como funciona o Prolog
+- dado uma query `?- human(eliza)` o prolog procura no banco de conhecimento um fato que contenha o predicado `human` com 1 argumento.
+- a procura é de cima para baixo
+- o primeiro que ele encontra é `human(david)`.
+- então o prolog tenta `unificar` os termos da query com os respectivos termos do fato encontrado.
+neste caso ele tentaria unificar `david` com `eliza`.
+
+  **1a regra de unificacao: 2 simbolos unificam se eles sao o
+  mesmo simbolo.**
+  
+- portanto não há unificação, ou a query nao `casa` (match) com o fato, e o prolog continua a busca.
+- o casamento falha com john e finalmente a query casa com `human(eliza)`. Neste caso dizemos que a query foi `satisfeita` e o prolog imprime Yes ou true
+- dada a query `human(tereza)` o Prolog nao consegue casar a query com nenhum fato, e quando ele chega aos final dos fatos, o prolog imprime
+
+`No` ou `false`
+
+## com variavel e com backtracking
+- a query `human(X)`.
+- o prolog encontra o fato `human(david)`.
+
+  **2a regra de unificação: uma variavel sem valor (unbinded)
+  unifica com um simbolo e passa a ter como valor (bind) esse
+  simbolo**
+
+- o query casa com `human(david)` e a variavel `X`(da query) passa a ter o valor `david`.
+- a query foi satisfeita, e o Prolog imprimiria `Yes` ou `true` mas como há uma variável do query com valor atribuido, o Prolog imprime
+
+`X = david`
+
+Se a gente força o backtracking (`;` ou `next`) o prolog
+
+- vai no ultimo fato que foi casado (`human(david)`)
+- desfaz as atribuições a variáveis feitos nesse casamento (`X=david`). `X` passa a nao ter valor.
+- continua procurando _abaixo_ do fato onde houve o casamento
+- casa com `human(john)` onde `X `passa assumir o valor `john`
+- imprime `X = john`
+- novo backtracking, casa com `human(suzie)` e imprime `X = suzie`
+- novo backtracking, casa com `human(eliza)` e imprime `X = eliza`
+- novo backtracking e o prolog chega ao final do banco de dados, e imprime `No`
+
+  
+## Regras [Prolog Rules](https://en.wikibooks.org/wiki/Prolog/Rules)
+
+~~~Prolog
+father(X,Y) :- parent(X,Y), man(X).
+mother(X,Y) :- parent(X,Y), woman(X).
+~~~
+- father(X,Y) é a father(X,Y) é a `cabeça` da regra da regra
+- parent(X,Y), man(X) é o corpo da regra
+- a virgula , indica `and`
+- o operador `:-` deve ser lido como `se`
+- O query `?- father(X,eliza).` imprime
+
+`X = john     ;`
+
+`No`
+
+onde o `;` indica que forçamos o backtrack
+
+O query `?- father(A, C).` imprime
+
+~~~Prolog
+ A = david
+ B = john    ;
+ 
+ A = david
+ B = eliza   ; 
+ 
+ No
+~~~
+<br>
+
+## Como regras funcionam
+- buscando satisfazer um query o prolog pode casar com a cabeça de uma regra.
+- se o casamento da certo, o corpo da regra passa a ser o novo query.
+- ?- parent(X,eliza). tenta casar com a cabeça da regra, Neste caso X do query casa com o X da regra, e Y da regra casa com eliza
+
+  **3a regra de unificação: 2 variaveis sem valor podem unificar e
+  se uma delas assumir um valor (no futuro), a outra assume esse valor**
+  
+- o nome de uma variável é local a query ou a regra. Ou seja o X da query nao tem nada a ver com o X da regra, mas no casamento elas ficam unificadas.
+
+- `father(X,eliza)` casa com `father(X,Y)` onde X_q = X_r
+
+- `parent(X,eliza),man(X)` é o novo query
+
+- `parent(david, john)` nao casa por causa do eliza
+
+- `parent(john, eliza)` casa e causa `X = john.`
+
+- `man(john)` é o novo query, que casa com o fato `man(john)`
+
+- as query foram todas satisfeitas, e portanto o prolog imprime
+~~~Prolog
+X = john
+~~~
+
+- esse `X` é o `X` da query, que foi unificado com o X da regra que durante o processo foi unificado com john.
+
+<br>
+
+# and
+- uma query
+`a(..) , b(..) , c(..) ,d(..) .`
+tentara satisfazer `a(..)`, depois `b(..)`, depois `c(..)`, e finalmente d`(..)`.
+
+- se `d(..)` for satisfeito, a query como um todo é satisfeita, e se for a ultima query o prolog imprime a solução.
+
+- `se a(..)` não puder ser satisfeito, a query como um todo **falha** e se essa for a query do usuário, o prolog imprime `No` (ou `false`)
+
+- se `a(..)` for satisfeito, o prolog tenta satisfazer (provar) `b(..)`. Se `b(..)` falhar, o prolog automaticamente causa um backtracking no a, se no backtracking `a(..)` der certo, tenta de novo satisfazer `b(..)`
+
+- o backtracking no `a(..)` causa, provavelmente, uma outra solução para as variavies do `a(..)`, e com esses novos valores, `b(..)` pode ser solucionado, etc.
+
+<br>
+
+Vamos incluir a regra:
+
+~~~Prolog
+mother(X,Y) :- parent(X,Y), woman(X).
+~~~
+
+e o query `?- mother(Z,eliza)`.
+
+- o query casa com a cabeça da regra e Z = X e Y = eliza.
+
+- proximo query `parent(X,eliza),woman(X)`.
+
+- `parent(X,eliza)` casa com `parent(john, eliza)` e `X = john`
+
+- parent(john,eliza) foi satisfeito, deu certo, e a próxima query é woman(john)
+
+- o query `woman(john)` falha, causando o backtrack no `parent(X,eliza)`
+
+- desfaz as atribuições feitas no casamento de `parent(X,eliza)` ou seja X passa a nao ter valor, e procura outra solução.
+
+- tenta casar com `parent(suzie,eliza`) que da certo com `X = suzie`.
+
+- o novo query é `woman(suzie)` que casa com o último fato relativo a `woman`.
+
+- a query final do corpo da regra deu certo e portanto o casamento da query original com a cabeça da regra deu certo.
+
+- a (ultima) query final deu certo e o prolog imprime
+~~~Prolog
+  X = suzie`
+~~~
+<br>
+
+# Exercício
+- escreva a regra para irmao(X,Y) ou na verdade meio-irmão (um parente em comum) Sua solução nao vai estar 100% certa. Discutiremos esse problema na próxima aula
+
+- escreva a regra para irmao_cheio(X,Y) - 2 pessoas com os mesmos 2 parentes
+
+Suponha um banco de dados com fatos pai e mae.
+
+~~~Prolog
+
+pai(antonio, beatriz).
+pai(cassio, durval).
+...
+mae(tereza, beatriz).
+mae(valeria, durval).
+~~~
+
+- para esse banco de fatos escreva a regra para `avo(A,N)` onde A é um dos avôs de N (neto/neta) . Note que há duas formas de ser avô, pai do pai ou pai da mae. Serão 2 regras para avo.
+
+- escreva a regra recursiva `descendente(D,A)` onde D é um descendente de A (antecessor). Assuma o banco de dados original, com um predicado `parent`
+</details>
