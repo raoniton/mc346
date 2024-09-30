@@ -2805,3 +2805,665 @@ mae(valeria, durval).
 
 - escreva a regra recursiva `descendente(D,A)` onde D é um descendente de A (antecessor). Assuma o banco de dados original, com um predicado `parent`
 </details>
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
+
+<details>
+  <summary>Aula 12 - Continuação, =, not  \+, ou ; , números, listas, pattern matching,  </summary>
+
+  # Aula 12 
+##### [Livro texto](https://en.wikibooks.org/wiki/Prolog)
+
+##### [Prolog interativo](https://swish.swi-prolog.org/)
+
+# Continuando prolog basico
+vamos assumir o banco de dados
+~~~Prolog
+parent(alberto,beatriz).
+parent(alberto,carlos).
+parent(alberto,zeca).
+parent(denise,beatriz).
+parent(denise,zeca).
+parent(elisa,carlos).
+parent(beatriz,flavio).
+parent(gustavo,flavio).
+~~~
+a primeira definição de (meio) irmao - pelo menos um parent em comum (neste caso o Z).
+
+~~~Prolog
+     irmao(X,Y) :- parent(Z,X),parent(Z,Y).
+~~~
+<br>
+testando
+
+~~~Prolog
+      ?- irmao(beatriz,K).
+~~~
+<br>
+
+respostas
+
+~~~Prolog
+K = beatriz
+K = carlos
+K = zeca
+~~~
+
+beatriz é meio irmã de beatriz? Sim segundo a definição, mas claramente queremos pessoas diferentes.
+
+- so por que as variaveis X e Y tem nomes diferentes não significa que elas vao ter valores diferentes,
+- por outro lado as variaveis X que aparecem na regra “são todas a mesma variável”
+- precisamos uma definição/operação para diferente
+<br>
+
+# o =
+a operação `=` em prolog é a operação de unificação que dicutimos ate agora
+
+~~~Prolog
+pedro = antonio      % -> falha
+X = antonio          % -> da certo e X passa a valer  antonio
+antonio = X          % ->  da certo e X passa a valer antonio
+antonio = X, X = Y   % -> da certo e X e Y valem anotonio
+X = Y                % -> da certo e X e Y terao o mesmo valor (quando um assumir um )
+X = Y, Y = antonio, X = pedro   % -> falha
+~~~
+unificação é uma mistura de teste de igualdade e atribuição (bidirecional)
+<br>
+
+# o not +
+Negaçao em prolog é complicada pois não há boleanos. Um predicado nao retorna True, e um `not` não transforma esse valor para False.
+
+Negação em prolog indica se o predicado de dentro deu ou não certo. _negation by failure_
+
+~~~Prolog
+not p(..)     ou    \+ p(..)  
+vai dar certo, se p(...) falhar
+
+\+ ( p(..), q(..) )
+vai dar certo se (p(..),q(..) ) falhar
+~~~
+<br>
+
+# meio irmao
+~~~Prolog
+irmao(X,Y) :- parent(Z,X), parent(Z,Y), \+ X=Y.
+~~~
+<br>
+
+# irmao cheio
+~~~Prolog
+irmao_cheio(X,Y) :- parent(Pai,X), parent(Pai,Y),
+                    parent(Mae,X), parent(Mae,Y),
+                    \+ Mae = Pai,
+                    \+ X=Y.
+~~~
+<bt>
+  
+# Avô
+dado o predicados `pai(a,b)` se `a` é pai de `b`, e `mae(a,b)`
+
+~~~Prolog
+avo(A,N) :- pai(A,M), mae(M,N).
+avo(A,N) :- pai(A,P), pai(P,N).
+~~~
+<br>
+
+# o ; ou
+o `;` é o operador `ou`.
+
+~~~Prolog
+   a(..), b(..), ( c(..) ; d(..) ).
+~~~
+
+vai tentar provar `a` depois `b` e depois `c` .
+
+
+Se `c` falhar, ele vai tentar `d` antes de dar o backtraking.
+
+Avo pode ser escrito com o ;
+~~~Prolog
+ avo(Avo,Neto) :- pai(Avo,X), ( mae(X,Neto) ; pai(X,Neto) ).
+~~~
+<br>
+
+# Descendente 
+##### [Recursive Rules](https://en.wikibooks.org/wiki/Prolog/Recursive_Rules)
+~~~Prolog
+descende(X,Ansestral) :- parent(Ansestral,X).
+descende(X,Ansestral) :- parent(Ansestral, Filho), 
+                               descende(X,Filho).
+~~~
+
+Coloque o caso **base antes**.
+
+o caso recursivo tambem poderia ser escrito como
+
+~~~Prolog
+descende(X,Ansestral) :- parent(PAI, X), descende(PAI,Ansestral).
+~~~
+<br>
+
+# Numeros em Prolog
+A coisa mais importante é que expressões matematicas só são calculadas em 2 contextos
+
+- Os 2 lados de uma comparação:
+~~~Prolog
+X*4/Y > Z**2
+~~~
+<br>
+
+- Do lado direito de um `is`
+~~~Prolog
+X is Y+2
+~~~
+<br>
+
+`is` calcula o valor do lado direito e `unifica` com o lado esquerdo.
+
+Expressões podem não dar certo em tempo de execução pois algumas variáveis podem não ter valor no momento da execução
+
+- Isso vai dar um erro
+~~~Prolog
+Y is X+2, X = 2
+~~~
+<br>
+
+- Isso vai dar algo estranho:
+~~~Prolog
+X = 4, Y = X+2
+~~~
+`NAO` use o `=` numa expressão matemática.
+<br>
+
+- Isso é equivalente:
+~~~Prolog
+X = 2
+X is 2
+~~~
+<br>
+
+# comparações
+~~~Prolog
+A > B
+A >= B
+
+A =< B
+
+A =:= B  /* igualdade aritimetica */
+A =\= B  /* desigualdade aritimetica */
+~~~
+<br>
+
+# Listas
+Heterogeneas, entre `[ ]`
+
+~~~Prolog
+[1, 2, [5,6], abobora, [] ]
+~~~
+<br>
+
+# Pattern matching:
+~~~Prolog
+[Cabeca|Resto] -- equivale ao (cabeca:resto) do haskell
+[]
+[X|R] nao casa com a lista vazia
+
+[1,2,3] = [X|R]
+X = 1, R = [2,3]
+~~~
+<br>
+
+# Exemplos
+- tamanho de uma lista
+~~~Prolog
+tam([],0).
+tam([_|R],N) :- tam(R,NN), N is NN+1.
+~~~
+<br>
+
+- com acumulador
+~~~Prolog
+tam(L,N) = tamx(L,N,0).
+tamx([],N,Acc) :- Acc=N.
+tamx([X|R],N,Acc) :- AA is Acc+1, tamx(R,N,AA).
+~~~
+
+nesta ultima regra o prolog indica `singleton variable X` . Isso é um warning que a variavel `X` aparece só uma vez, e isso pode ser um erro com consequencias graves na hora de rocar ou nao ser nada serio como no caso acima.
+
+Voce pode usar a variavel anonima `_`
+<br>
+
+# Modo
+quando vc programa `tam` vc assume que vc recebe a lista `(+)` e vai devolver o tamanho dela `(-)`
+
+tam modo (+-)
+
+# Erros
+- Nao da para somar 1 numa variavels (N)
+~~~Prolog
+tam([],0).
+tam([_|R],N) :- tam(R,N), N is N+1.  <- erro
+
+tam([_|R],N) :- tam(R,NN), N = NN+1.  <- correto
+~~~
+<br>
+
+`N is N+1` nunca da certo! Ou `N` nao tem valor, e a expressão da um erro, ou `N` tem valor e o lado esquerdo não unifica com o lado esquerdo
+<br>
+
+- Não da para passar expressões como parametros do predicado.
+~~~Prolog
+tamx([X|R],N,Acc) :- tamx(R,N,Acc+1).   <- erro
+
+tamx([X|R],N,Acc) :-  AA is Acc+1, tamx(R,N,AA).  <- correto
+~~~
+Lembre-se expressões matematicas `NAO` sao avaliadas em passagem de parametros.
+<br>
+
+# Exemplo 2
+Soma dos elementos de uma lista soma(+LISTA,-SOMA)
+~~~Prolog
+soma([],S) :- S=0.
+soma([X|R],S) :- soma(R,SS), S is SS+X.
+
+ou
+
+soma([], 0). 
+soma([X|R],S) :- soma(R,SS), S is SS+X.
+~~~
+<br>
+
+# exemplo 3
+soma dos números pares de uma lista somapares(+LISTA,-SOMA)
+~~~Prolog
+somapares([], 0).
+somapares([X|R], SP) :- X mod 2 =:= 0, somapares(R,SS),
+                        SP is SS+X.
+somapares([X|R], SP) :- somapares(R,SS), SP=SS.
+~~~
+
+se `X` é par , ele executa a 2a regra. Se `X` é impar, o primeiro predicado da 2a regra falha, e o prolog executa a 3a regra.
+
+Nao precisamos de `IF/ELSE`. A 2a regra testa para a condição `X mod 2 =:= 0` e contém o `THEN`. A 3a regra contem o `ELSE`.
+
+Outra versão
+
+~~~Prolog
+somapares([],0).
+somapares([X|R], SP) :- X mod 2 =:= 0, somapares(R,SS),
+                        SP is SS+X.
+somapares([_|R], SP) :- somapares(R,SP).
+~~~
+<br>
+
+Outra versão
+~~~Prolog
+somapares([], 0).
+somapares([X|R], SP) :- somapares(R,SS),
+            (X mod 2 =:= 0 , SP is SS+X 
+         ;   SP=SS).
+~~~
+<br>
+
+# Exercícios
+Da aula 1 e 2 e haskell - use acumuladores quando necessario.
+~~~Prolog
+o append(+,+, -)
+
+append([],A,A).
+append([X|R],A,AA) :- append(R,A,RR), AA = [X|RR].
+
+ou 
+
+append([],A,A).
+append([X|R], A, [X|RR]) :- append(R,A,RR).
+~~~ 
+
+- tamanho de uma lista
+
+-soma dos elementos nas posições pares da lista ( o primeiro elemento esta na posicao 1. somapospar(+LISTA,-SOMA)
+
+- existe item na lista `elem(+IT,+LISTA)
+
+- posição do item na lista: 1 se é o primeiro, falha se nao esta na lista pos(+IT,+LISTA,-POS)
+
+- conta quantas vezes o item aparece na lista (0 se nenhuma) conta(+IT,+LISTA,-CONTA)
+
+- reverte uma lista. reverte(+LISTA,-LISTAR)
+
+- intercala 2 listas (intercala1 e intercala2)
+~~~Prolog
+intercala1([1,2,3], [4,5,6,7,8], X).
+ X =  [1,4,2,5,3,6]
+intercala2([1,2,3], [4,5,6,7,8], Y),
+ Y =   [1,4,2,5,3,6,7,8]
+~~~
+
+- a lista ja esta ordenada? ordenada(+LISTA)
+
+- dado n gera a lista de n a 1 range(+N,-LISTA)
+
+- retorna o ultimo elemento de uma lista ultimo(+LISTA, -ULT)
+
+- retorna a lista sem o ultimo elemento: semultimo(+L,-LSEMULT)
+
+- shift right
+
+~~~Prolog
+shiftr([1,2,3,4],X)
+ X = [4,1,2,3]
+~~~
+
+- shiftr n lista (shift right n vezes)
+
+- shift left
+
+- shift left n vezes
+
+- remove item da lista (1 vez só): remove(+IT,+LISTA,-LISTASEM).
+
+- remove item da lista (todas as vezes)
+
+- remove item da lista n (as primeiras n vezes)
+
+- remove item da lista (a ultima vez que ele aparece) **
+
+- troca velho por novo na lista (1 só vez): troca(+L,+VELHO,+NOVO, -LISTAtrocada)
+
+- troca velho por novo na lista (todas vezes)
+
+- troca velho por novo na lista n (as primeiras n vezes)
+  
+</details>
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
+
+<details>
+  <summary>Aula 13 - Correção dos exercícios, IF-THEN-ELSE, Cut, Predicados, fail e true</summary>
+
+  # Aula 13
+  <br>
+  
+# Exercicios
+Da aula 1 e 2 - use acumuladores quando necessario.
+
+- tamanho de uma lista
+
+- soma dos elementos de uma lista soma(+LISTA,-SOMA)
+
+- soma dos números pares de uma lista somap(+LISTA,-SOMA)
+
+- soma dos elementos nas posições pares da lista ( o primeiro elemento esta na posicao 1) somapares(+LISTA,-SOMA)
+
+~~~Prolog
+somapares([],0).
+somapares([_],0).
+somapares([A,B|R],S) :- somapares(R,SS), S is SS+B.
+~~~
+<br>
+
+existe item na lista elem(+IT,+LISTA)
+~~~Prolog
+elem(IT,[IT|_]).
+elem(IT,[_|R]) :- elem(IT,R).
+~~~
+<br>
+
+- posição do item na lista: 1 se é o primeiro, falha se nao esta na lista
+~~~Prolog
+pos(+IT,+LISTA,-POS)
+pos(IT,L,P) :- pos(IT,L,P,1).
+pos(IT,[X|_],P,N) :- X=IT,P=N.
+pos(IT, [_|R],P,N) :- NN is N+1, pos(IT,R,P,NN)
+
+
+pos(IT,L,P) :- pos(IT,L,P,1).
+pos(IT,[IT|_],P,P).
+pos(IT, [_|R],P,N) :- NN is N+1, pos(IT,R,P,NN)
+
+~~~
+<br>
+
+- conta quantas vezes o item aparece na lista (0 se nenhuma) conta(+IT,+LISTA,-CONTA)
+~~~Prolog
+conta(_,[],0).
+conta(X,[X|R],N) :- conta(X,R,NN), N is NN+1.
+conta(X,[_|R],N) :- conta(X,R,N).
+~~~
+<br>
+
+- reverte uma lista
+~~~Prolog
+rev(L,B) :- rev(L,B,[]).
+rev([],A,A).
+rev([X|R],B,A) :- rev(R,B,[X|A]).
+~~~
+Voce pode usar o mesmo nome. O predicado é a combinação do nome e do numero de argumentos. No prolog o predicado é chamado de rev\2 e rev\3.
+<br>
+
+- intercala 2 listas (intercala1 e intercala2)
+~~~Prolog
+intercala1([1,2,3], [4,5,6,7,8], X).
+ X =  [1,4,2,5,3,6]
+intercala1([],_,[]).
+intercala1(_,[],[]).
+intercala1([A|RA],[B|RB],[A,B|RR] ) :- intercala1(RA,RB,RR).
+intercala2([1,2,3], [4,5,6,7,8], Y),
+ Y =   [1,4,2,5,3,6,7,8]
+~~~
+<br>
+
+- a lista ja esta ordenada?
+~~~Prolog
+ordenada([]).
+ordenada([_]).
+ordenada([A,B|R]):- A =< B, ordenda([B|R]).
+~~~
+<br>
+
+- dado n gera a lista de n a 1
+~~~Prolog
+gera(1,[1]).
+gera(N,L) :- NN is N-1, gera(NN,LL), L = [N|LL].
+~~~
+<br>
+
+- retorna o ultimo elemento de uma lista
+~~~Prolog
+ultimo([X],X).
+ultimo([_|R],X) :- ultimo(R,X).
+~~~
+<br>
+
+- retorna a lista sem o ultimo elemento
+~~~Prolog
+semult(L,LS) :- rev(L,[_|LL]),rev(LL,LS).
+~~~
+<br>
+
+- shift right
+~~~Prolog
+shiftr([],[]).
+shiftr([X],[X]).
+shiftr(L,LS) :- ultimo(L,U),
+                semult(L,LL),
+                LS = [U|LL].
+~~~
+<br>
+
+- shiftr n lista (shift right n vezes)
+
+- shift left
+
+- shift left n vezes
+
+- remove item da lista (1 vez so)
+~~~Prolog
+remove(_,[],[]).
+remove(IT,[IT|R],R).
+remove(IT,[X|R],SAIDA) :- remove(IT,R,RR),
+                          SAIDA = [X|RR]
+~~~
+<br>
+- remove item da lista (todas as vezes)
+
+- remove item da lista n (as primeiras n vezes)
+
+- remove item da lista (a ultima vez que ele aparece) **
+
+- troca velho por novo na lista (1 so vez) troca(+LISTA,+VELHO,+NOVO,-ListaNova)
+~~~Prolog
+troca1([],_,_,[]).
+troca1([V|R],V,N,[N|R]).
+troca1([X|R],V,N,LN) :- troca1(R,V,N,LR),LN = [X|LR].
+troca velho por novo na lista (todas vezes)
+~~~
+<br>
+
+- troca velho por novo na lista n (as primeiras n vezes)
+<br>
+
+# Operadores IF-THEN-ELSE (1a versão)
+~~~Prolog
+Not
+
+\+ (predicado)
+OR
+
+A ; B 
+IF then else como OR
+
+(teste, then) ; else
+~~~
+
+# IF THEN ELSE (2a versão)
+~~~Prolog
+p :- teste, then.
+p :- else.
+~~~
+<br>
+
+# IF THEN ELSE (3a versão)
+Novo operador ->
+
+A ser explicado logo abaixo
+~~~Prolog
+teste -> then ; else
+~~~
+<br>
+
+# Cut !
+~~~Prolog
+nota(N,L) :- N>9,L=a.
+nota(N,L) :- N>7,L=b.
+nota(N,L) :- N>5,L=c.
+nota(_,d).
+~~~
+
+~~~Prolog
+?- nota(8.5,X).
+~~~
+
+O predicado funciona na primeira chamada mas erra os resultados no backtracking/next.
+
+O que precisamos é um jeito de dizer ao prolog que se ele decidiu por uma das regras, mesmo no backtrack ele nao pode escolher outra regra.
+~~~Prolog
+nota(N,L) :- N>9,!, L=a.
+nota(N,L) :- N>7,!, L=b.
+nota(N,L) :- N>5,!, L=c.
+nota(_,d).
+
+?- nota(8.5,X).
+a :- b, c, !, d, e.
+a :- f, g.
+~~~
+Se a execuçao passa pelo cut ela esta comprometida com essa regra. No backtraking o pedicado a vai falhar (e nao tentar provar na regra abaixo).
+<br>
+
+# predicados deterministicos
+- nao geram outra solução no backtracking
+
+- falham no backtraking
+~~~Prolog
+..., A+1 > 2*B, proximo(A,B). 
+a :- b, c, !.
+a :- d, e, f, !.
+a: - g.
+~~~
+
+Cut no final torna o predicato deterministico.
+<br>
+
+# fail e true.
+`fail` é um predicado que sempre falha.
+
+`true` é um predicado que sempre da certo.
+
+Como indicar que um predicado deve falhar numa certa condição
+
+~~~Prolog
+elem(_,[]) :- !, fail.
+~~~
+
+O `fail` sozinho nao funciona pois ele vai forçar o bracktracking. o cut + fail funcional
+<br>
+
+# IF THEN ELSE
+~~~Prolog
+a :- teste, !, then.
+a :- else.
+
+a :- teste -> then ; else
+a :- antes, (teste 
+            -> then 
+            ;  else).
+~~~
+
+# IF THEN
+~~~Prolog
+a :- antes, (teste 
+            -> then
+            ;  true).
+~~~
+Infelizmente precisa do true na posição do else.
+<br>
+
+# multiplos IFs
+~~~Prolog
+a :- teste1, !, then1.
+a :- teste2, !, then2.
+a :- teste3, !, then3. 
+a :- else.
+~~~
+</details>
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
+
+
