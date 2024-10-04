@@ -259,7 +259,7 @@ vamos definir uma lista comprimida cujos elementos são listas de 2 elementos [i
 1) Implemente o predicado comprime(ListaOriginal, ListaComprimida)
 
 ~~~Prolog
-  ?- comprime([3,3,3,4,5,6,5,5,5,5,7], X].
+  comprime([3,3,3,4,5,6,5,5,5,5,7], X].
   X =  [[3,3],[4,1],[5,1],[6,1],[5,4],[7,1]]
 ~~~
 <br>
@@ -271,6 +271,7 @@ vamos definir uma lista comprimida cujos elementos são listas de 2 elementos [i
 ~~~
 
 <br>
+
 ### Comentário
 É possivel que voce so precise escrever um predicado comprime(A,B) que quando dado A computa em B a compressão, e quando dado B (uma lista comprimida) e A é uma variavel sem valor, retorna em A a lista original. Nós ja vimos pelo menos dois predicados que funcionam dessa forma bidirecional o tam (tamanho de uma lista) e o append. Em ambos, nao pensamos explicitamente em implementar o predicado de forma bidirecional. Isso aconteceu sem querer. Isso pode acontecer nesse problema. Eu ainda nao implementei esse predicado mas minha intuição diz que isso pode acontecer. Mesmo com a minha experiencia de Prolog eu nao sei como escrever predicados que deliberadamente funcionem de forma bidirecional mesmo quando isso é possivel. Em suma, implementem o comprime, e testem se ele funciona de forma bidirecional - e assim voce não precisarão implementar o descomprime.
 
