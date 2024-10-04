@@ -30,7 +30,10 @@ somapospar([],0).
 somapospar([_,B|R], SUM) :- somapospar(R, SUM1), SUM is SUM1+B . 
 
 
-/* 3 - existe item na lista `elem(+IT,+LISTA) */
+/* 3 - existe item na lista `elem(+IT,+LISTA) 
+    ?- existe(5, [1,2,3,4,5,6,7,8]).
+    true 
+*/
 existe(It, [It|_]).
 existe(It, [_|R]) :- existe(It, R).
 
@@ -212,6 +215,7 @@ trocaAll([], _, _, []).
 trocaAll([Velho|LS], Velho, Novo, [Novo|X]):- trocaAll(LS, Velho, Novo, X).
 trocaAll([L|LS], Velho, Novo, [L|X]):- trocaAll(LS, Velho, Novo, X).
 
+
 /* 22 - troca velho por novo na lista n (as primeiras n vezes) 
     trocaN([1,2,3,4,2,2,2,2,2], 2, 20,4, X).
     X = [1, 20, 3, 4, 20, 20, 20, 2, 2].
@@ -220,4 +224,5 @@ trocaN([], _, _, _, []).
 trocaN(X, _, _, 0, X).
 trocaN([Velho|LS], Velho, Novo, N, [Novo|X]):- N1 is N - 1, trocaN(LS, Velho, Novo, N1, X).
 trocaN([L|LS], Velho, Novo, N, [L|X]):- trocaN(LS, Velho, Novo, N, X).
+
 
