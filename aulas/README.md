@@ -3202,7 +3202,10 @@ shiftr([1,2,3,4],X)
   # Aula 13
   <br>
   
-# Exercicios
+  <details>
+    <summary>Correção - Exercícios Aula 12</summary>
+
+  # Exercicios
 Da aula 1 e 2 - use acumuladores quando necessario.
 
 - tamanho de uma lista
@@ -3339,7 +3342,209 @@ troca velho por novo na lista (todas vezes)
 <br>
 
 - troca velho por novo na lista n (as primeiras n vezes)
+  </details>
 <br>
+
+# Estruturas
+tipo de dado com o mesmo formato que um predicado
+~~~Prolog
+pai(antonio,ana)
+
+arv(NO,AE,AD)
+~~~
+
+Estruturas unificam entre si da mesma forma que predicados
+
+- nome (functor) igual,
+- mesmo numero de argumentos
+- cada argumento correspondente nas 2 estruturas unifica recursivamente
+~~~Prolog
+a(X, B, f(4)) = a(3, C, f(Z))
+X = 3, B = C, Z = 4.
+~~~
+<br>
+
+# arvores
+~~~Prolog
+arv(NO, AE, AD) ou vazia
+~~~
+<br>
+
+# dicionários
+~~~Prolog
+[ dic(CHAVE, VALOR), ...]
+~~~
+<br>
+
+# Predicados de alta ordem
+Predicados que recebem outros predicados/estruturas como argumentos
+
+## call
+transforma uma estrutura em um query
+~~~Prolog
+?- P = pai(X,ana), call(P).
+
+P = pai(antonio, ana),
+X = antonio.
+~~~
+<br>
+
+## univ =..
+constroi uma estrutura de uma lista (ou quebra uma estrutura em seus componentes)
+~~~Prolog
+?- X =.. [a,4,5].
+
+X = a(4, 5)
+
+?- Y = pai(a,b), Y =.. Z.
+
+Z = [pai, a, b].
+~~~
+
+## map
+mapeia um predicado em 1 lista (map1) ou em duas listas (map2), etc
+~~~Prolog
+map1(_, []).
+map1(P, [X|R]) :- G=..[P,X], call(G),
+                 map1(P,R)
+
+map2(_, [], []).
+map2(P, [X|RX], [Y|RY]) :- G =.. [P,X,Y], call(G),
+                         map2(P,RX,RY).
+~~~
+<br>
+
+Na verdade é possível usar o mesmo nome map pois o predicado so unifica com um outro predicado de mesmo nome e mesmo numero de argumentos.
+
+~~~Prolog
+map(_, []).
+map(P, [X|R]) :- G=..[P,X], call(G),
+                map(P,R)
+
+map(_, [], []).
+map(P,[X|RX],[Y|RY]) :- G =.. [P,X,Y], call(G),
+                         map(P,RX,RY).
+~~~
+se distingue as duas versões de map por map/2 e map/3
+
+O map ja esta implementado em SWIProlog [apply em listas](http://www.swi-prolog.org/pldoc/doc/_SWI_/library/apply.pl) como maplist
+<br>
+
+## filter
+~~~Prolog
+%  filter(+Teste, +Lin, -Lout)
+filter(_, [], []).
+filter(T, [X|R], Lout) :- G =.. [P,X],
+                        call(G), filter(T,R,RR), 
+                        Lout = [X| RR].
+                        
+filter(T, [_|R], Lout):-filter(T, R, Lout).
+~~~
+ja implementado como include no SWIProlog
+
+<br>
+
+
+## foldl
+~~~Prolog
+foldl(+P, +Lista, +Val_inicial, -Val_final)
+~~~
+P tem que ser um predicado de 3 argumentos
+~~~Prolog
+P( +Dado, +Acumulador, -NovoAcum)
+foldl(_,[],ACC,FINAL).
+foldl(P,[X|R],ACC,FINAL) :-
+    G =.. [P,X,ACC,NACC],
+    call(G),
+    foldl(P,R,NACC,FINAL).
+~~~
+
+foldl ja esta implementado no SWIProlog.
+<br>
+
+## Todas as soluções
+~~~Prolog
+pai(a,b).
+pai(a,c).
+pai(b,e).
+pai(c,f).
+
+ant(A,B) :- pai(A,B).
+ant(A,B) :- pai(A,C),ant(C,B).
+~~~
+<br>
+
+## findall
+
+findall( padrao, query, lista-com-os-resultados)
+lista-com-os-resultados acumula todos os valores que padrao assume nas solucoes de query
+
+todos filhos de a:
+~~~Prolog
+findall(X, pai(a,X), L).
+L = [b, c].
+~~~
+<br>
+
+todos os pais de e:
+~~~Prolog
+?- findall(X,pai(X,e),L).       
+L = [].
+~~~
+
+<br>
+
+todos filhos de alguém:
+~~~Prolog
+findall(X, pai(Z,X), L).
+L = [b, c, e, f].
+~~~
+
+Veja que o Z aparece no query mas nao no padrão. Assim eles podem assumir qualquer valor nas varias soluçoes do query.
+
+pares (lista de 2) de pais/filhos:
+~~~Prolog
+findall( [X,Y], pai(X,Y), L).
+
+L = [[a, b], [a, c], [b, e], [c, f]].
+~~~
+
+Todos os pares (uma estrutura zz(filho, ai)) de pais e filhos que sao decendentes de a.
+~~~Prolog
+findall(zz(X,Y), (ant(a,X),pai(Y,X)), L).
+~~~
+
+Há 2 outros predicados parecidos mas com comportamento diferente em casos particulares `bagof` e `setof`
+<br>
+
+# Alterando o banco de dados
+<br>
+
+## assertz
+assertz insere um fato no final do BD.
+~~~Prolog
+:- dynamic pai/2.
+
+?- assertz(pai(f,h)).
+?- listing(pai/2).
+~~~
+asserta insere no inicio do BD.
+
+<br>
+
+## retract
+remove o 1o fato que unifica como o argumento do retract
+~~~Prolog
+?- retract(pai(a,Z)).
+~~~
+<br>
+
+## retractall
+remove todos os fatos que unificam com o argumento.
+~~~Prolog
+?- retractall(pai(_,_)).
+~~~
+
 
 # Operadores IF-THEN-ELSE (1a versão)
 ~~~Prolog
