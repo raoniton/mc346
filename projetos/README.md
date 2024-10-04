@@ -115,7 +115,7 @@ ghci> concat [[1],[3,4,9],[],[5,6,7,10],[],[4]]
 <details>
   <summary>Projeto 3 - Haskell - Manipulando Tuplas</summary>
 
-  # Proj 3
+  # Projeto 3
   <b>Entrega: Até meia noite de 18/09</b>
   
 
@@ -243,8 +243,49 @@ Sem ter ainda implementado esse problema, eu acho que é suficiente no passo aci
 -->
 
 <details>
-  <summary>Projeto 5</summary>
+  <summary>Projeto 5 - Prolog - Compressão e Descompressão de Listas</summary>
+
+<b> Data: 7/10 (ate meia noite) </b>
+
+# Projeto 5
+
+## Compressão e descompressão de listas
+dada a lista
+
+`[4,4,4,7,7,4,4,0,3,7,7,7,7]`
+vamos definir uma lista comprimida cujos elementos são listas de 2 elementos [item, quantidade] onde quantidade é o número de vezes que o item aparece sequenciamente na lista. Assim, a compressão dessa lista seria:
+
+`[[4,3],[7,2],[4,2],[0,1],[3,1],[7,4]]`
+1) Implemente o predicado comprime(ListaOriginal, ListaComprimida)
+
+~~~Prolog
+  ?- comprime([3,3,3,4,5,6,5,5,5,5,7], X].
+  X =  [[3,3],[4,1],[5,1],[6,1],[5,4],[7,1]]
+~~~
+<br>
+
+2) Implemente a função descomprime(ListaComprimida, ListaExpandida) que é o inverso de comprime
+~~~Prolog
+  descomprime([[3,3],[4,1],[5,1],[6,1],[5,4],[7,1]], X).
+  X =  [3,3,3,4,5,6,5,5,5,5,7]
+~~~
+
+<br>
+### Comentário
+É possivel que voce so precise escrever um predicado comprime(A,B) que quando dado A computa em B a compressão, e quando dado B (uma lista comprimida) e A é uma variavel sem valor, retorna em A a lista original. Nós ja vimos pelo menos dois predicados que funcionam dessa forma bidirecional o tam (tamanho de uma lista) e o append. Em ambos, nao pensamos explicitamente em implementar o predicado de forma bidirecional. Isso aconteceu sem querer. Isso pode acontecer nesse problema. Eu ainda nao implementei esse predicado mas minha intuição diz que isso pode acontecer. Mesmo com a minha experiencia de Prolog eu nao sei como escrever predicados que deliberadamente funcionem de forma bidirecional mesmo quando isso é possivel. Em suma, implementem o comprime, e testem se ele funciona de forma bidirecional - e assim voce não precisarão implementar o descomprime.
+
 </details>  
+
+<!--
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
 
 <details>
   <summary>Projeto 6</summary>
