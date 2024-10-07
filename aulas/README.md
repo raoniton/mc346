@@ -3670,5 +3670,439 @@ a :- else.
 ##########################################################################################################################################################
 ##########################################################################################################################################################
 -->
+<br> 
 
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=white)
+
+<details>
+  <summary>Aula 14 - Python</summary>
+
+ # Aula 14 - Python
+##### [Python online](https://replit.com/languages/python3)
+
+##### [Python Tutorial](https://docs.python.org/3/tutorial/index.html)
+
+##### [Standard library](https://docs.python.org/3/library/index.html)
+<br>
+
+# Historia
+criando em 1989 por Guido van Rossum
+
+python 3.0 (2008) não é backward compatible com o 2.0
+
+- inteiros sem overflow
+- print era um comando (sem parenteses) e virou uma função com um numero qualquer de argumentos
+- strings são so em unicode (antes havia 2 tipos de string)
+`/` era divisão inteira se os 2 argumentos fossem inteiros, e agora `//` é a divisão inteira, `/` é sempre real
+- 2.7 é a ultima versão da familia 2.0
+
+Guido deixou de ser o _ditador benevolente_ vitalicio do python em 2018 por causa -[deste PEP 572](https://www.python.org/dev/peps/pep-0572/) - atribuição em expressões `(:=)`
+
+~~~Python
+if (match := pattern.search(data)) is not None:
+    # Do something with match
+
+while chunk := file.read(8192):
+   process(chunk)
+
+[y := f(x), y**2, y**3]
+
+filtered_data = [y for x in data if (y := f(x)) == 0]
+~~~
+<br>
+
+# PEP
+##### [Python Enhancement Proposals](https://www.python.org/dev/peps/)
+<br>
+
+# implementações
+- CPython é a “padrão” (versão 3.10 lançada em Outubro 2021) - nao confundir com Cython que é uma linguagem para programação em baixo nivel em Python que compila para C.
+
+- micropython - para sistemas embarcados https://micropython.org/
+
+- IronPython - para o .NET https://ironpython.net/ (versão 3.4)
+
+- Jython - converte para bytecode do Java https://www.jython.org/ (versão 2.7)
+
+- pypy - JIT compiler https://www.pypy.org/index.html
+  pypy normalmente esta de 1 a 2 números abaixo a subversão do CPython
+
+- nao confunda pypy with PyPi (instalador mais tradicional de pacotes python)
+
+- stackless python https://github.com/stackless-dev/stackless/wiki
+<br>
+
+# paralelismo/concurrency
+concurrency - nao necessariamente em paralelo, mas operaçoes que demoram muito (I/O) sao executadas “ao mesmo” tempo que outras operaçoes
+
+paralelismo - operacoes sao realmente executadas em paralelo em diferentes cores/CPU ou mesmo computadores
+
+O ambiente de execução do CPython nao permite concorrencia (interno - automático) por causa do [GIL- global interpreter lock](https://realpython.com/python-gil/)
+
+- não há paralelização automática - se esse comando esta demorando muito então já começe o outro
+
+- o programador pode criar código que explicitamente roda em threads (start/synchronize/etc) mas provavelmente ele não roda realmente em threads https://realpython.com/intro-to-python-threading/
+
+- pacote asyncio https://www.youtube.com/watch?v=GpqAQxH1Afc a partir de 3.10
+
+- há um paralelismo em batch - outro Python sera inicializado e eles se comunicam usando pipes mas não ha memoria compartilhada [multiprocessing](https://docs.python.org/3/library/multiprocessing.html) e [concurrent.futures](https://docs.python.org/3/library/concurrent.futures.html#module-concurrent.futures)
+
+esses podem criar um “modelo de memoria compartilhada” para o programador mas nao é realmente compartilhada no baixo nivel
+
+para obter paralelismo de threads (dentro do mesmo processo) é preciso que o codigo tenha sido escrito em C. Isso é o caso para o numpy, pandas, etc. Uma funçao do numpy pode rodar varios threads em paralelo.
+<br>
+
+# Tipagem Dinamica
+Variáveis não precisam ser declaradas e não tem tipos
+~~~Python
+x = 90
+x = "qwerty"
+x = [3,4,56]
+~~~
+Basicamente, toda variável é um apontador para um valor.
+
+id(x) retorna o valor do apontador armazenado na variável x
+
+<br>
+<table>
+  <tr>
+    <th colspan= "5" center>Tipos Básicos</th>
+    <tr>
+      <td>int</td>
+      <td>float</td>
+      <td>complex</td>
+      <td>bool</td>
+      <td>None</td>
+    </tr>
+  </tr>
+</table>
+<br>
+
+
+no python >= 3.0, inteiros são unbounded (bignums) - pode não corresponder aos inteiros de hardware
+
+float é o double do hardware - 53 bits de precisão e 11 de expoente
+<br>
+
+# compostos
+- lista [2, 3, "abc", [], 6.7]
+- string "querty" ou 'querty'
+- tupla (1, "abc",  2)
+- dicionário { "abc":4, "de":9, "aav": -3}
+- set
+- frozenset
+- etc
+<br>
+
+# mutáveis e imutáveis
+- tipos basicos são imutáveis
+Trocar o valor de uma variavel que contem um tipo básico significa criar um novo valor e apontar a variável para esse novo valor.
+
+~~~Python
+x=5
+id(x)
+x=x+1
+id(x)
+~~~
+<br>
+
+- listas são mutaveis - **modificar** um valor mutável mantem o mesmo apontador. **Atribuir** um novo valor, como sempre, muda o apontador
+~~~Python
+x = [10, 20, 30, 40]
+id(x)
+x[1]
+x[1] = 99
+id(x)
+x = [10, 99, 30, 40]
+id(x)
+~~~
+<br>
+
+- String e tuplas são imutáveis - operações que modificariam essas sequencias não funcionam
+
+~~~Python
+x = (10, 20, 30, 40)
+x[1]
+x[1]= 99
+~~~
+<br>
+
+- dicionarios e conjuntos (set) mutáveis, frozensets sao imutaveis.
+<br>
+
+# atribuição
+~~~Python
+x=[1,2,3]
+id(x)
+y=x
+id(y)
+z=x[:]
+id(z)
+~~~
+O jeito simples de pensar é que uma expressão do lado direito da atribuição **retorna um apontador** para um valor e nao o valor. Pode ser que o lado direito precisa ser avaliado e um valor é computado, mas o que é passado para o lado esquerdo é o apontador para esse valor.
+
+atribuição apenas faz a variável do lado esquerdo apontar para esse apontador
+~~~Python
+a=2
+b=a
+id(a)
+id(b)
+b=b+1
+a
+id(b)
+f=1+1
+id(f)
+~~~
+Note que id(a) == id(f)
+
+Python predefine inteiros pequenos (de -5 a 256)
+https://realpython.com/lessons/small-integer-caching/
+
+# Listas ( e sequencias)
+- indexação começando em 0
+
+- indices não podem passar do fim
+
+- indices negativos - do fim para o começo
+~~~Python
+x = [10, 20 , 30, 40, 50]
+x[0]
+x[7]
+x[-2]
+x[-7]
+~~~
+<br>
+
+## slices
+subsequencias de listas
+~~~Python
+x = [10,11,12,13,14,15,16,17,18]
+x[2:5]
+~~~
+elementos nas posicoes 2 até antes do 5
+<br>
+
+Abreviações:
+~~~Python
+x[:3] => x[0:3]
+x[3:] => x[3:final]
+~~~
+<br>
+
+Pode ter passo diferente de 1
+~~~Python
+x[1:20:3]
+x[::-1] - lista revertida
+~~~
+<br>
+
+Pode atribuir valor a slices, de diferentes tamanhos
+~~~Python
+x[2:5] = [1,2]
+x[2:5] = []
+~~~
+<br>
+
+## Copia rasa e copia profunda
+`[:]` copia a lista (copia **rasa**)
+~~~Python
+a= [1,[2,3],4]
+b=a[:]
+b[0]=9
+b[1][0]=99
+~~~
+
+https://docs.python.org/3/library/copy.html veja deepcopy
+<br>
+
+## operadores, funções e metodos em lista
+- len(l) tamanho
+- l.append(v) insere v no final de l
+- x in l - True se x aparece na lista l
+- x not in l
+- l1 + l2 - append
+- 5 * [1,2,3] = [1,2,3,1,2,3,1,2,3]
+- lista1 < lista2 - ordem lexicográfica
+- lista2 == lista2
+- max(l) - maior valor em l
+- l.sort - modifica l (mas nao retorna nada)
+- sorted(l) - retorna nova lista ordenada
+- [outros metodos](https://docs.python.org/3/tutorial/datastructures.html)
+- del x[1] - remove - é um operador e não uma função (sem parênteses) ou metodos (sem ponto).
+- lista (e tuplas e dicionarios podem terminar com ,
+~~~Python
+x = [1,
+    2,
+    3,
+    ]
+~~~
+<br>
+
+## List comprehensions
+como no Haskel mas com uma sintaxe diferente
+
+~~~Python
+[f(x) for x in fonte if condicao]
+
+[x**2 for x in [2,3,4,5,6,7] if x % 2 == 0]
+~~~
+<br>
+
+## implementação de listas
+<br>
+
+## Tuplas
+sequencias como lista mas imutáveis
+
+metodos de lista não funcionam
+
+funções de lista funcionam.
+~~~Python
+x = (1,2,3,4,5)
+x[1]
+x[3:]
+max(x)
+~~~
+<br>
+
+# pattern matching
+Para atribuição (lado esquerdo são variáveis).
+
+- funciona para tuplas
+~~~Python
+(a,b)  = (10,"qwerty")
+~~~
+<br>
+
+- em atribuicoes, valores separados por , são implicitamente tuplas
+~~~Python
+(a,b) = 10, "querty"
+a,b = (10,"querty")
+a,b = 10 , "querty"
+a,b = b,a
+~~~
+<br>
+
+- para listas *var é para o resto da lista
+~~~Python
+[a,b,c] = [1,4.5, "zzz"]
+[a,*b] = [1,4.5, "zzz"]
+~~~
+<br>
+
+python 3.10 introduz um outro pattern matching tipo switch (match - case https://www.python.org/dev/peps/pep-0636/#matching-sequences
+
+testa por igualdade e por estrutura
+~~~Python
+match command.split():
+    case []:
+        ....
+    case ["quit"]:
+        print("Goodbye!")
+        quit_game()
+    case ["look"]:
+        current_room.describe()
+    case ["get", obj]:
+        character.get(obj, current_room)
+    case ["go", direction]:
+        current_room = current_room.neighbor(direction)
+    # The rest of your commands go here
+~~~
+<br>
+
+# Strings
+- sequencia
+- ente ” ou ’
+- imutáveis
+- caracteres Unicode,
+- sintaticamente, não existe o tipo caracter
+~~~Python
+x = "qwerty"
+x[2]
+x[2][2]
+~~~
+<br>
+
+~~~Python
+in testa por substrings
+x = 'qwerty'
+'wer' in x
+~~~
+
+- s.split() - words do haskell mas permite outros separadores
+- s.splitlines() - lines do haskell
+- outros [metodos para strings](https://docs.python.org/3/library/stdtypes.html#text-sequence-type-str) e [mais outros](https://docs.python.org/3/library/string.html)
+<br><br>
+
+# Dicionários
+~~~Python
+x = { 'asd': 56, 'qwerty': -8, 'zxcv': 3}
+x['qwerty']
+x['zzz']
+x['qwerty'] = 9
+'zzz' in x
+~~~
+<br>
+
+qualquer tipo imutável pode ser a chave, qq tipo pode ser o valor
+
+[metodos para dicionarios](https://docs.python.org/3/library/stdtypes.html#mapping-types-dict)
+
+Implementado como uma hash table que usa a funcão interna hash para gerar um indicator para cada valor. https://stackoverflow.com/questions/327311/how-are-pythons-built-in-dictionaries-implemented
+<br><br>
+
+# Set
+[sets](https://docs.python.org/3/tutorial/datastructures.html#sets)
+<br><br>
+
+# None
+tipo com apenas um valor None.
+
+- no REPL nao imprime nada
+- valor retornado se funçoes que nao retornam nada explicito
+- valor de parametros de funções que nao sao passados na chamada
+- var `is None` para testar
+<br>
+
+# for
+- o comando for passeia pelos elementos de uma sequencia (no futuro veremos sao os elementos de um iterator).
+
+- para listas, tuplas, strings, e sets são seus elementos
+
+- para dicionarios sao as chaves
+
+- para gerar números no `for`: `range`
+
+~~~Python
+list(range(10))
+list(range(2,10))
+list(range(2,10,3))
+~~~
+~~~Python
+for i in range(len(lista)):
+~~~
+list converte o objeto para listas
+<br>
+
+# Exercícios
+- criar uma lista com apenas os valores pares de outra lista
+- criar uma lista com os valores nas posicoes pares
+- criar um dicionário com a contagem de cada elemento numa lista
+- qual é a chave associada ao maior valor num dicionario
+- qual o elemento mais comum numa lista
+- uma lista é sublista de outra?
+- dado 2 strings o fim de um é igual ao comeco do outro?
+</details>
+
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
 
