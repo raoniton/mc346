@@ -1,4 +1,3 @@
-
 # Notas de aulas do [Professor Jacques Wainer](https://www.ic.unicamp.br/~wainer/)
 ![Haskell](https://img.shields.io/badge/Haskell-5e5086?style=for-the-badge&logo=haskell&logoColor=white)
 <details>
@@ -4603,6 +4602,256 @@ operator overloading; definir diferentes ações para o mesmo operador
 - `__add__` para +
   
 </details>
+
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
+
+<details>
+  <summary>Aula 16 - Decorators, @, Iterator, Classe, For, Generators, Itertools, Coroutines</summary>
+
+  # Aula 16
+##### [Python online](https://repl.it/)
+##### [Python Tutorial](https://docs.python.org/3.9/tutorial/index.html)
+##### [Standard library](https://docs.python.org/3.9/library/index.html)
+
+# Decorators
+Forma de modificar o comportamento (externo) de classes e funções.
+
+- funções que se lembram de execuções passadas
+- funções que fazem logs
+são funções que recebem funções como argumentos e retornam uma outra função (que cuida dessa parte externa)
+~~~Python
+def llog(f):
+   def wrapper(*args): 
+      print("entrada:",args)
+      x = f(*args)
+      print("saida:",x)
+      return x
+   return wrapper
+
+def aux(x,y):
+   return 2*x+y
+
+zz = llog(aux)
+~~~
+<br>
+
+# notação @
+~~~Python
+aux = llog(aux)
+
+@llog
+def aux(x,y):
+   return 2*x+y
+~~~
+<br>
+
+# Decorators com estado - decorators como objetos
+Voce pode retornar um objeto. Se o objeto for chamado como função, o método `__call__` desse objeto será executado
+
+~~~Python
+class decconta:
+   def __init__(self,f):
+      self.funcao=f
+      self.conta=0
+   def __call__(self,*args):
+      self.conta += 1
+      return self.funcao(*args)
+
+xx=decconta(aux)
+~~~
+<br>
+
+# mais info
+[a primer on decorators](https://realpython.com/primer-on-python-decorators/)
+
+
+# Exercícios
+- decorator para imprimir o tempo de execução
+- decorator para construir um string com linhas para a hora e argumentos e saida de cada chamada da função. O string será acessado via atributo
+- decorator para memoizar a função. Memoização é criar um dicionário que se lembra dos valores de entrada e de saída da função ja executado. Se um desses valores de entrada for re-executado, a função não será re-executada - ela apenas retorna o valor de saída memoizado
+- decorator para log argumentos e horario num arquivo (append no arquivo) dado como argumento do decorator (ver o primer on decorators )
+<br>
+
+# Iterator
+Iterator é um thunk do haskell - uma promessa de computação que retorna um elemento por vez.
+
+Funciona dentro de um `for`
+
+# classe
+- tem que ter um metodo `__iter__` que retorna um interator. A funçao iter chama o metodo `__iter__`
+- tem que ter o metodo `__next__` que retorna o proximo elemento. A função next chama o metodo `__next__`
+- gera a exception `StopIteration` quando não há mais elementos
+~~~Python
+x = iter([2,3])
+next(x)
+next(x)
+next(x)
+~~~
+<br>
+
+
+# for
+~~~Python
+for x in coisa:
+  ...
+~~~
+é na verdade uma abreviação para
+~~~Python
+ii=iter(coisa)
+try: 
+  while True:
+    x = ii.__next__()
+    ...
+except StopIteration:
+    pass
+~~~
+<br>
+
+# exemplo
+~~~Python
+class Repetidor:
+   def __init__(self,x,n=4):
+      self.n=n
+      self.x=x
+   def __iter__(self):
+      return self
+   def __next__(self):
+      if self.n<=0: 
+         raise StopIteration
+      else:
+         self.n-=1
+         return self.x
+~~~
+<br>
+
+# generators
+Generators são funções que guardam o estado entre uma chamada e outra. Sintaticamente a unica diferença é usar um `yield` em vez do `return`
+
+A cada execuçao, o `yield`computa o proximo valor a ser retornado e interrompe a execuçao. No proximo `next` o generator continua executando do ultimo `yield`.
+~~~Python
+def rep(x,n=4):
+  while n>0:
+     n-=1
+     yield x
+>>> z = rep(77)
+>>> z.__next__()
+77
+>>> next(z)
+77
+>>> next(z)
+77
+>>> next(z)
+77
+>>> next(z)
+~~~
+```
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+StopIteration
+```
+<br>
+
+# generator comprehension
+- Como list comprehention, mas usando ( e )
+~~~Python
+zz= (x*x for x in range(10,1000) if x % 4 == 0)
+
+zz.__next__()
+next(zz)
+~~~
+<br>
+
+# itertools
+uma biblioteca para iterators https://docs.python.org/3/library/itertools.html
+<br>
+
+# iterators no python
+iterators no Python não sao exatamente bem conectados com o resto do python como os thunks sao em haskell (na minha opinião).
+
+- algumas coisas retornam um iterator e coisas similares não
+~~~Python
+a = [6,5,3,1,7]
+sorted(a)
+reversed(a)
+~~~
+
+- == explora toda as 2 listas para ver se são iguas, mas nao iterators
+~~~Python
+list(range(1:4))
+[1,2,3] == range(1,4)
+~~~
+
+por outro lado faz algum sentido não expandir os iterators - eles vao gerando novos elementos e não dá para `rewind`/ voltar atras num iterator (por exemplo o iterator que le linhas de um arquivo)!
+<br>
+
+# coroutines
+processos que enviam mensagens de um para outro. Normalmente produtores, filtros e consumidores
+
+um `filtro` precisa receber uma mensagem, e talvez enviar uma outra mensagem para o consumidor final
+
+- enviar mensagem `consumidor.send(msg)` - manda a mensagem msg para o objeto `consumidor`
+- receber mensagem msg = `(yield)`
+
+~~~Python
+def filtro(padrao,proximo):
+   print("Comecando filtro")
+   while True:
+     msg = (yield)
+     if padrao in msg:
+        proximo.send(msg)
+
+
+
+def consumidor():
+    print("Comecando consumidor final")
+    while True:
+       l=(yield)
+       print(l)
+
+c=consumidor()
+f=filtro("ab",c)
+c.__next__() #para chegar no yield
+f.__next__() # para chegar no yield
+for x in "afh ahabcj agdb yyabctt abc abdddc".split():
+    f.send(x)
+~~~
+<br>
+
+# exercícios
+Sem usar a itertools
+
+- `pares`: dado um iterator, retorna um iterator com os elementos nas posicoes pares (0,2,..)
+- `reverte`: dado um iterator, reverte ele (obviamente é preciso expandir of interator para chegar no ultimo elemento - * )
+- `ziper`: dado 2 iterators, retorna um iterator que retorna os elementos intercalados
+- `cart`: dado 2 iterators, retorna um iterator com o produto cartesiano dos elementos (todos os pares entre os 2 iterators) *
+- `ciclo`: dado um iterator, retorna os elementos num ciclo infinito
+- `rangeinf(init,passo=1)`: retorna um iterator que gera numeros de init ate infinito, com passo
+- `take`: como o take do haskell
+- `drop` - como o drop do haskell
+  
+</details>
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
+
 
 
 <!-- 
