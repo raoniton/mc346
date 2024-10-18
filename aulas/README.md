@@ -1,3 +1,4 @@
+
 # Notas de aulas do [Professor Jacques Wainer](https://www.ic.unicamp.br/~wainer/)
 ![Haskell](https://img.shields.io/badge/Haskell-5e5086?style=for-the-badge&logo=haskell&logoColor=white)
 <details>
@@ -3675,7 +3676,7 @@ a :- else.
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=white)
 
 <details>
-  <summary>Aula 14 - Python</summary>
+  <summary>Aula 14 - Python - Introdução</summary>
 
  # Aula 14 - Python
 ##### [Python online](https://replit.com/languages/python3)
@@ -4106,3 +4107,511 @@ list converte o objeto para listas
 ##########################################################################################################################################################
 -->
 
+<details>
+  <summary>Aula 15 - Exceptions, Funções, Variáveis locais e globais, closures, Orientação a Objetos</summary>
+
+# Aula 15
+##### [Python online](https://repl.it/)
+##### [Python Tutorial](https://docs.python.org/3.9/tutorial/index.html)
+##### [Standard library](https://docs.python.org/3.9/library/index.html)
+
+# Exception
+~~~Python
+try:
+   ----
+   ---- AAA
+   ----
+except:
+   ----
+   ----
+~~~
+Um erro/exception em AAA interrompe o bloco e executa o except
+<br>
+
+# exceptions
+- `NameError`: nome nao definido, variavel sem valor
+- `TypeError`
+- `KeyError`: chave não existe no dicionario
+- `IndexError`: index numa lista
+- `MemoryError`: nao consegue alocar memoria
+[lista de exceptions predefinidas](https://docs.python.org/3/library/exceptions.html#bltin-exceptions)
+
+user defined exceptions
+<br>
+
+# outras versoes de try/except
+Diferentes tratamentos para diferentes exceptions
+~~~Python
+try:
+  ---
+except TypeError:
+  ---   
+except (KeyError,IndexError):
+  ---
+except:
+  ---
+~~~
+Nao usar except sem argumento
+<br><br>
+
+~~~Python
+try: 
+  ----
+except Exception:
+  ----
+~~~
+captura todas as exceptions menos control-C
+<br>
+
+# Else e finally
+~~~Python
+try:
+   ----
+except Exception:
+   ----
+else:
+   ---  so executa se nao houve exception
+try:
+   ----
+except A:
+   ----
+finally:
+   ---  sempre executa mesmo que tenha exceptions que nao foram pegas
+~~~
+finally sera discutido abaixo
+<br>
+
+# outros
+Como levantar uma exception: `raise`
+
+Como definir sua propria exception
+
+https://docs.python.org/3/tutorial/errors.html
+<br>
+
+# Commando pass
+~~~Python
+try:
+    ----
+    ----
+except  Exception as e:
+    pass
+~~~
+<br>
+
+~~~Python
+truque p/ dicionários
+try:
+   dic[x]+=1
+except:
+   dic[x]=1
+~~~
+<br>
+
+em vez de
+~~~Python
+if x in dic: 
+   dic[x]+=1
+else:
+   dic[x]=1
+~~~
+<br>
+
+# pilha de execução
+Exceções vão interrompendo a execução dos _contextos_ (funções - pilha de execução) até que um `except` capture a exceção
+
+~~~Python
+def a():
+   -- raise X
+
+def b():
+   ...
+   a()
+   ...
+   
+def c():
+    ...
+    b()
+    ...
+    
+def d():
+    try:
+      c()
+    except X:
+      -- trata
+~~~
+a exceção gerada la dentro. Todos os contextos sao percorridos e removidos até chegar no d
+
+O ambiente iterativo ou o ambiente em batch capturam todas as exceções que chegam neles - no ambiente em batch o programa é terminado. No iterativo só a pilha de execução é interrompida e a execução volta para o REPL
+
+O `finally` (ate onde eu entendo)
+~~~Python
+def a()
+    try:
+        --- raise X
+    finally:
+        print(y)
+~~~
+o finally do `a` é executado antes de jogar a exceção para cima no contexto do `a`
+<br>
+
+# Funções
+~~~Python
+def func(a,b,linha):
+    ''' descricao 
+       descricao'''
+    ----
+    ----
+    ----
+    return c
+~~~
+<br>
+
+# return
+- return expressao
+- return `a,b` - tupla
+- return `None` a funçao é sintaticamente/praticamente um procedimento/comando
+<br>
+
+~~~Python
+def f(x):
+    ----
+    return None
+
+f(4)
+~~~
+<br>
+
+# default arguments
+~~~Python
+def askok(prompt, retries=4, reminder='Please try again!'):
+  ----
+~~~
+`prompt` é obrigatório
+
+- askok('Do you really want to quit?')
+- askok('Do you really want to quit?',2)
+- askok('Do you really want to quit?',2,'Sim ou nao')
+<br>
+
+# Chamando a função
+Parametros casados por posição:
+- askok('Do you really want to quit?',2,'Sim ou nao')
+  
+ou por nome:
+- askok(‘Do you really want to quit?’,remainder = ‘Sim ou nao’)
+- askok(‘Do you really want to quit?’,retries = 2)
+- askok(retries = 2,prompt = ‘Do you really want to quit?’)
+  
+http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html
+<br><br>
+
+# valores default
+Cuidado: o default só é avaliado uma vez (quando a função é carregada??)
+~~~Python
+def f(a, L=[]):
+    L.append(a)
+    return L
+
+print(f(1))
+print(f(10))
+print(f(30))
+~~~
+<br>
+
+# numero qq de argumentos
+~~~Python
+def somatoria(*lista):
+    soma=0.0
+    for x in lista:
+       soma+=x
+    return soma
+~~~
+todos os valores passados são coletados na `lista`
+
+ha também a possibilidade de passar numero qq de argumentos por nome `(a=3,b="string", velocidade=9.7)` que sao coletados num dicionário (notação `**var`)
+<br>
+
+~~~Python
+def somatoria(**dic):
+    if "b" in dic and len(dic["b"]) > 10 :
+    ---
+    ---
+~~~
+<br>
+
+# Variaveis locais e globais
+Não há declaracao de variáveis entao vc não sabe só vendo se uma variavel é local ou global
+
+**Uma variavel é em principio local se a função atribui um valor a ela**
+~~~Python
+x=0
+y=10
+
+def f():
+  x=100
+  print(x+1)
+  print(y+1)
+
+f()
+print(x)
+~~~
+
+`x` é local na funçao, `y` é global
+<br>
+
+Onde voce atribui o valor à variavel não é importante
+~~~Python
+x=0
+y=10
+
+def f():
+  print(x+1)
+  print(y+1)
+  if False: 
+     x=100   # nunca é executado!
+
+f()
+~~~
+```
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+  File "<stdin>", line 4, in f
+UnboundLocalError: local variable 'x' referenced before assignment
+```
+no caso acima, x é local por causa da atribuição que nunca é executada.
+
+ATENCAO: Modificar uma variavel mutavel não é atribuir um valor a ela e não torna ela local
+~~~Python
+l={'a':1,'b':2,'c':3}
+def ff():
+  l['x']=44  # l é global
+
+
+ff()
+print(l)
+~~~
+<br>
+
+# global
+a declaraçao `global` indica que a variavel sera global
+~~~Python
+x=0
+def f():
+  global x
+  x=100
+  print(x+1)
+  print(y+1)
+
+
+f()
+x
+~~~
+<br>
+
+# Funcoes internas a outras funções
+~~~Python
+def fora(x):
+   ---- 
+   def dentro(y):
+      ---
+      z = x+y
+      return z
+   ---
+~~~
+`x` é local a `fora` mas é global para `dentro` O mais correto é dizer que x é não-local para `dentro`
+<br>
+
+# nonlocal
+~~~Python
+def fora(x):
+   z=10
+   def dentro(y):
+      z = x+y
+~~~
+z é local a dentro
+~~~Python
+z=100
+def fora(x):
+    z=10
+    def dentro(y):
+      nonlocal z
+      z = x+y
+    
+    dentro(10)
+    print("z fora = ",z)
+    
+fora(0)
+~~~
+`z` é o `z` de `fora` (mas `z` não é global).
+
+~~~Python
+z=100
+def fora(x):
+   z=10
+   def dentro(y):
+      global z
+      z = x+y
+   
+   dentro(10) 
+   print("z fora = ",z)
+
+fora(0)
+~~~
+<br>
+
+# funções que retornam funções
+~~~Python
+def gg():
+
+    def aux(l):
+      l.reverse()
+      return l
+
+    return aux
+
+a = gg()
+a([1,2,3])
+~~~
+<br>
+
+# closures
+
+~~~Python
+def gera():
+   x=0
+
+   def aux():
+     nonlocal x
+     x +=1
+     print(x)
+
+   return aux
+
+a = gera()
+
+a()
+~~~
+`x` é uma variavel local de `gera` e não local de `aux` mas que se mantem viva por todo o programa
+
+- escopo é a região do programa que pode acessar uma variável pelo seu nome
+- extensão é o duração temporal de uma variável
+- para variáveis locais a extensão é a duração do escopo, a não ser que a variável seja um clousure.
+<br>
+
+# OO in Python
+## class
+~~~Python
+class Pessoa:
+   def setidade(self,x):
+       if x >0 :
+         self.idade=x
+
+   def getidade(self):
+        return self.idade
+~~~
+Só dá para definir os métodos. (Normalmente) não há a definição de atributos/campos/variavies
+
+Há sempre o parâmetro `self` para os metodos, que indicam o objeto sobre o qual o método esta sendo executado. Ate onde eu sei vc pode usar qq nome para o primeiro argumento, mas eu so vi `self` sendo usado.
+<br>
+
+# objetos
+Atribuos/campos/variaveis dos objetos são sempre visiveis e modificaveis!! Nao ha atributos privados
+~~~Python
+x=Pessoa()
+
+x.setidade(12)
+x.getidade()
+
+x.idade
+
+x.idade=99
+
+x.nome="jose"
+~~~
+Usualmente indica-se um atributo privado usando dois underscores no inicio e no fim (regra para programadores, não para o ambiente de execução) `__nome__`
+<br>
+
+# Construtor
+`Pessoa()` cria um objeto, se existe isso chama o construtor `__init__`
+~~~Python
+class Pessoa:
+   def __init__(self,idade,nome):
+      if idade>0:
+         self.idade=idade
+      self.nome=nome
+
+x = Pessoa(-45,"jose")
+~~~
+<br>
+
+# Herança
+~~~Python
+class Aluno(Pessoa):
+   pass
+
+a=Aluno()
+isinstance(a,Aluno)
+isinstance(a,Pessoa)
+~~~
+<br>
+
+# atributos de classe
+
+~~~Python
+class Pessoa:
+   npernas=2
+
+x=Pessoa()
+y=Pessoa()
+
+x.npernas
+x.npernas=9
+x.npernas
+y.npernas
+Pessoa.npernas
+Pessoa.npernas=10
+y.npernas
+x.npernas
+~~~
+<br>
+
+# OO in python?
+Usualmente não se cria um monte de objetos.
+
+Usualmente objetos são uma interface para as bibliotecas
+
+http://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html
+<br>
+
+# Python object model
+https://docs.python.org/3/reference/datamodel.html
+
+operator overloading; definir diferentes ações para o mesmo operador
+
+`x[i]` acesso em listas e dicionários
+
+- x[i] na verdade chama o metodo `x.__getitem__(i)`
+- `__str__` é chamado pelo print para imprimir um dado (converte p/ string)
+- `__init__` e `__new__` sao chamados pelo construtor
+- `__eq__(x,y)` é chamado na comparação `x == y`
+- `x.__getattr__("a")` chamado em `x.a`
+- `__setattr__` para setar um atributo
+- `__call__(self[, args...])` chamado em `x(a,b,c)`
+- `__len__(self)` para len
+- `__iter__(self)` e `__next__(self)` veremos em interators
+- `__add__` para +
+  
+</details>
+
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
