@@ -1,3 +1,6 @@
+
+
+
 # Notas de aulas do [Professor Jacques Wainer](https://www.ic.unicamp.br/~wainer/)
 ![Haskell](https://img.shields.io/badge/Haskell-5e5086?style=for-the-badge&logo=haskell&logoColor=white)
 <details>
@@ -4839,6 +4842,394 @@ Sem usar a itertools
 - `take`: como o take do haskell
 - `drop` - como o drop do haskell
   
+</details>
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
+<br>
+
+![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white)
+
+<details>
+  <summary>Aula 17 - Numpy</summary>
+
+# Aula 17 Numpy
+
+# Numpy
+**Arrays** em numpy são diferentes de listas ou listas de listas. Eles são mais eficientes e ninguém usa listas ou lista de listas em aplicações cientificas, que precisam ser eficientes tanto em memoria utilizada como em tempo de execução.
+
+> <img src="https://img.shields.io/badge/YouTube-0d1116.svg?style=for-the-badge&logo=YouTube&logoColor=red" height="25"/><br>
+&emsp;&nbsp;&nbsp; Veja os 3 primeiros videos em [codebasics](https://www.youtube.com/watch?v=rN0TREj8G7U&list=PLeo1K3hjS3uset9zIVzJWqplaWBiacTEU) que mostram bem os conceitos basicos de numpy.
+
+
+> [Datacamp - Python Numpy Array Tutorial](https://www.datacamp.com/community/tutorials/python-numpy-tutorial) é um texto tambem bom <br>
+> [Scypy Org - Quickstart tutorial](https://docs.scipy.org/doc/numpy-1.15.1/user/quickstart.html) é user guide do numpy mas eu acho o texto um pouco difícil para aprender.
+
+numpy **não** vem pre-instalado no Python.
+
+~~~Python
+import numpy as np
+~~~
+(há um pacote de arrays no standard library array https://docs.python.org/3/library/array.html mas que nao é usado na prática, nao sei bem por que).
+<br><br>
+
+## criação array
+[Array Creation - Numpy Org](https://numpy.org/doc/stable/reference/routines.array-creation.html)
+<br>
+
+
+`np.array` (inicializa os valores)
+
+- 1D (inicializa com uma lista)
+
+- 2D - lista de linhas
+
+- 3 e nD - tensor
+
+- ndim (numero de dimensões)
+
+- shape (tamanho da cada dimensão)
+
+~~~Python
+import numpy as np
+
+a = np.array([5,4,3.1,2,5])
+a
+X = np.array([[1,2,3],[10,20,30],[100,200,300]])
+X
+X.ndim
+X.shape
+~~~
+<br>
+
+Sem valores iniciais diferentes
+- `np.ones` , `np.zeros`, `np.eye` (identidade) , `np.empty`
+
+<br>
+
+## Indexação de arrays
+[Arrays Indexing](https://numpy.org/doc/stable/reference/arrays.indexing.html)
+<br>
+
+- tradicional
+~~~Python
+X = np.arange(1000).reshape((10,100)) 
+X.shape # 10 linhas 100 colunas
+
+X[2,3]
+~~~
+<br>
+
+- por slices
+~~~Python
+X[0:4,8]
+X[:,8]
+X[0:4,8:10]
+~~~
+<br>
+
+- menos dimensões
+~~~Python
+X[1] - 2a linha
+~~~
+<br>
+
+- **por outro array** ou lista
+~~~Python
+arr = np.array([3,39,29,12])
+lis = [3,39,29,12]
+
+X[3,arr]
+X[3,lis]
+~~~
+<br>
+
+- **por array booleano**
+~~~Python
+arr
+arr[np.array([True,False,False,True])
+
+e = np.array([True,False,False,True,False,False,True,False,False,True,False])
+X[e,8]
+~~~
+<br>
+
+- indexacao por array de inteiros e por boleanos é comum em outras linguagens que tem array como tipo pre definido (R, Matlab, julia)
+<br><br>
+
+# indexação por 2 arrays - cuidado
+Usar 2 arrays ou 2 listas para os indexadores ao mesmo tempo **NAO** faz o que vc esperaria. O numpy faz a indexação par a par nas 2 listas
+
+~~~Python
+X[[3,4], [11,12] ] 
+X[np.array([3,4]), np.array([11,12]) ] 
+
+X[3,11]
+X[4,12]
+
+X[[3,4], [11,12,13,14] ]
+~~~
+<br>
+
+mas veja que com slices isso funciona como esperado
+~~~Python
+X[3:5,11:15]
+~~~
+<br>
+
+para ter o efeito esperado com multiplas listas de indexadores use o `np.ix_`
+~~~Python
+X[ np.ix_(np.array([3,4]), np.array([11,12,13,14])) ]
+
+
+X[ np.ix_([3,4], [11,12,13,14]) ] - funciona para listas de indices
+~~~
+**LEIA** a parte de indexação do manual do numpy https://numpy.org/doc/stable/reference/arrays.indexing.html
+
+- np.newaxis
+- ...
+- np.slice
+<br><br>
+
+# Operações em arrays
+- \+ \- \* \/ funcionam para array (operação elemento por elemento)
+
+- \* não é a multiplicação de matrizes (isso é o método dot)
+
+~~~Python
+a = np.array([10,20,30])
+b = np.array([1,2,3])
+a+b
+a*b
+a/b
+~~~
+<br>
+
+- multiplicação de matrizes (como em algebra linear)
+~~~Python
+a.dot(b)
+
+np.dot(a,b)
+~~~
+<br>
+
+- comparacoes funcionam para arrays (elemento por elemento)
+~~~Python
+a = np.array([1,2,3])
+b = np.array([1,4,3])
+a == b
+np.greater(a,b)
+~~~
+<br>
+
+diferente de listas que verificam se as 2 listas sao iguais
+~~~Python
+[1,2,3] == [1,4,3]
+
+np.all( np.array([1,2,3]) == np.array([1,4,3]) )
+~~~
+<br><br>
+
+# broadcast
+os argumentos não precisam ter a mesmas ndim (inclusive atribuição)
+~~~Python
+a+2
+4*X
+np.array([1,2,3]) == 1
+
+X % 2 == 0
+~~~
+<br>
+
+- broadcast para array 2D e mais é mais complicado. https://docs.scipy.org/doc/numpy/user/basics.broadcasting.html
+<br><br>
+
+# indexação avançada + broadcast ( exemplo)
+Rodar in ipython
+~~~Python
+import numpy as np
+
+def g1():
+    global x
+    for i in range(x.shape[0]):
+        for j in range(x.shape[1]):
+            if x[i,j] < 0.5:
+                x[i,j]=0.0
+    return None
+    
+def g2():
+    global x
+    x[x<0.5]=0.0
+    return None
+    
+y = np.random.rand(4000,30)
+x = np.array(y,copy=True)
+%timeit g1()
+x = np.array(y,copy=True)
+%timeit g2()
+~~~
+
+x<0.5 é um array 2D booleano que sever para indexar os elementos de x que vao trocar de valor
+<br><br>
+
+# tipo
+- arrays numpy sao implementados como arrays em C - memoria contigua
+- tipo np.int16 np.int32 np.float32
+- e não o inteiro do Python que é sem limite
+~~~Python
+X.dtype
+a.dtype
+~~~
+<br>
+
+- existe o tipo caracter e sequencia de caracter
+- existe o tipo np.object para apontador para qq coisa
+~~~Python
+c = np.array("qwert")
+c.dtype
+c = np.array(["qwert","asd","longo muitoooooooooooooooo longo",57])
+c.dtype
+~~~
+<br>
+
+# reshape
+- a operacao de modificar o formato de um array é barata. Não há copia dos dados
+~~~Python
+a = np.array([1,2,3,4,5,6,7,8,9,10,11,12])
+a
+b=a.reshape((3,4))
+b
+
+c = np.reshape(a,(1,12))
+~~~
+note a diferença entre a e c
+<br><br>
+
+# np.info
+~~~Python
+np.info(a)
+np.info(b)
+X = np.array([ [1,2],
+               [3,4],
+               [5,6],
+               [7,8])
+~~~
+<br>
+
+- shape
+
+- type
+
+- itemsize
+
+- fortran
+  - ordem fortran 1,3,5… - column major
+  - ordem C 1,2,3,.. row major
+    
+- stride https://stackoverflow.com/questions/53097952/how-to-understand-numpy-strides-for-layman como achar o proximo elemento, na linha (stride[1]) e na coluna (stride[0])
+
+- data - o block de memoria com os dados brutos do array. O Python reusa o data sempre que possível, trocando o stride para representar diferentes “formatos” do array. Veja que o reshape reusa o data.
+
+`np.info(c)` reusa o data tambem.
+<br>
+
+# Funçoes em numpy
+## Funções elemento por elemento
+- np.log
+
+- \+ \- \/ \*
+
+- np.add
+
+- np.greater >
+
+- np.logical_and
+<br>
+
+## Funções que agregam varios valores
+- np.all
+- np.sum https://numpy.org/doc/stable/reference/generated/numpy.sum.html#numpy.sum
+- np.amax
+`axis` - faz a operação agregação **nessa dimensão** - sobram as outras
+~~~Python
+a = np.arange(24).reshape(3,4,2)
+a
+
+np.sum(a,axis=0)
+
+np.amax(a,axis=(1,2))
+~~~
+<br>
+
+## Junta e quebra arrays
+https://numpy.org/doc/stable/reference/routines.array-manipulation.html#joining-arrays
+
+- `concatenate` - numa dimensão que ja existe - para arrays 2D `vstack` e `hstack` para juntar na vertical ou na horizontal
+- `stack` numa nova dimensão
+<br>
+
+## Algebra linear
+https://numpy.org/doc/stable/reference/routines.linalg.html
+
+- produto de matrizes e vetores
+- inversão de matrizes
+- fatoração de matrizes
+- auto-vetores e auto-valores
+<br>
+
+## I/O
+Formato interno para matrizes npy
+
+- save
+- load
+<br>
+
+Texto
+- savetxt
+- loadtxt
+
+csv
+- pacote da standard library [csv](https://docs.python.org/3/library/csv.html)
+- funcão do [pandas](https://pandas.pydata.org/index.html) `pandas.read_csv`
+<br>
+
+## bibliotecas de algebra linear
+as operações (e algumas funções - autovalores e auto vetores, determinantes, etc) do numpy são implementadas por bibliotecas de baixo nivel que operam diretamente no `data`
+
+Bibliotecas de algebra linear de baixo nivel
+- BLAS http://www.netlib.org/blas/
+- openBLAS https://github.com/xianyi/OpenBLAS/releases
+- LAPACK http://www.netlib.org/lapack/lug/
+- MKL https://software.intel.com/en-us/mkl
+- ATLAS
+- Armadillo http://arma.sourceforge.net/
+- 
+contiguous indica se o data pode ser enviado diretamente para a biblioteca de baixo nivel. Se nao, o numpy cria uma nova versão do array (copiado o `data`) de forma que possa ser usada pela biblioteca!
+
+# Loops mais complexos
+de uma olhada no 4a video de https://www.youtube.com/playlist?list=PLeo1K3hjS3uset9zIVzJWqplaWBiacTEU que fala sobre uma função util para fazer iteração em arrays.
+<br>
+
+# Cython
+Extensões tipo C do python https://cython.org/
+
+- sintaxe de controle do python
+- declaração de tipos de variáveis locais
+- pode incluir operações/funções do python (mas isso torna o código mais lento pois tem que haver a conversão para objetos python)
+
+Veja a função Primes em https://cython.readthedocs.io/en/latest/src/tutorial/cython_tutorial.html
+
+curso sobre cython https://nyu-cds.github.io/python-cython/
+
+Ha poucos sites discutindo cython + numpy
 </details>
 
 <!-- 
