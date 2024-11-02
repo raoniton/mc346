@@ -5242,8 +5242,269 @@ Ha poucos sites discutindo cython + numpy
 ##########################################################################################################################################################
 ##########################################################################################################################################################
 -->
+<br>
+
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=yellow)
+
+<details>
+  <summary>Aula 18 - Extras de Python - Exercícios, Pacotes e módulos, Programação Funcional, Debug </summary>
 
 
+# Aula 18 Extras de Python
+## Exercícios
+
+1. Dado X um array 2D com 10 linhas. Some 10 aos elementos da 1a linha, 20 aos da 2a, 30 aos da terceira e assim por diante
+2. Dado X um array 2D com 10 Colunas. Some 10 aos elementos da 1a coluna, 20 aos da 2a, 30 aos da terceira e assim por diante
+3. Dado z um array 1D. Remova de a todos os elementos negativos (retorna um novo array)
+4. Dado z um array 1D. substitua por 0 todos os elementos negativos de z
+5. Dado z um array 1D. Qual o maior valor em z
+6. Dado z um array 1D. Qual a posicao do maior valor em z
+7. Dado z um array 1D. Qual o valor em z com o maior valor absoluto? Se z = np.array([4,-5,2]), 4 é o maior valor, mas -5 é o dado com maior valor absoluto. A resposta deve ser -5 e nao 5 (eu nao quero o maior valor absoluto, eu quero o valor no array the yem o maior valor absoluto)
+8. Dado X um array 2D, compute a soma de cada linha.
+9. Dado X um array 2D compute a soma de cada coluna
+10. Dado X um array 2D, normalize cada linha, de forma que a soma dos valores das linhas é 1
+<hr>
+<br>
+
+# broadcast
+os argumentos não precisam ter a mesmas ndim (inclusive atribuição)
+
+~~~Python
+a = np.array([-3,-4,-5])
+
+X = np.array([[3,4,5],[6,7,8]])
+
+
+a+2
+4*X
+np.array([1,2,3]) == 1
+
+X % 2 == 0
+~~~
+
+Os argumentos não precisam tem o mesmo tamanho em cada uma das dimensões - esse tamanho pode ser 1.
+
+~~~Python
+a1 = np.array([100,200])
+
+a2 = np.array([[10,20,30]]
+
+X.shape
+a1.shape
+a2.shape
+
+X + a1
+
+X+ a2
+~~~
+
+- broadcast para array 2D e mais é mais complicado. https://docs.scipy.org/doc/numpy/user/basics.broadcasting.html
+<br>
+
+# Transposta
+
+é um atributo(?) e nao um metodo
+~~~Python
+np.info(X)
+
+Y = X.T
+
+np.info(Y)
+~~~
+<br>
+
+- reusa o `data`, mas o `continous` passa a ser falso e nao pode ser usado por bibliotecas de baixo novel de algebra linear
+  
+# pacotes/modulos
+Veja o link para o standard library
+
+- math - funcoes matemáticas
+- random - geracao de numeros aleatórios
+- re - expressoes regulares
+- os.path - diretorios e arquivos
+- sys e os - interface com o sistema operacional
+- collections - typos de dados para collections
+- itertools - iterators (próxima aula)
+- functools - programacao funcional
+- operator - operadores como função
+- pickle - salva e le objetos python
+- concurrent.futures - processamento em paralelo
+- requests - acesso ao http
+- time - informacoes temporais
+<br>
+
+Pacotes externos - requer instalacao `pip` ou `conda`
+- numpy - arrays
+- pandas - data frames (tabelas) e Polars (mais rapido)
+- scipy - operacoes scientificas e estatísticas
+- statsmodels mais estatistica
+- scikit-learn - aprendizado de maquina
+- beautifulsoup - processar paginas html
+- cherrypy - web server
+- Matplotlib e seaborn e Bokeh - graficos
+- SQLAlchemy - banco de dados
+- flask e streamlit e fastAPI - web ap builders
+<br>
+
+A interface para os modulos é normalmente através de objetos.
+
+Mas nem sempre - todas as funções em `math` e algumas no `scipy` são funções e não objetos/métodos
+
+Programas externos uteis
+- ruff lint
+- ipython, bpython - REPLs
+- virtual environments em python https://realpython.com/python-virtual-environments-a-primer/
+- python 3.9
+<br>
+
+
+# Programação funcional
+## funcoes anônimas
+lambda mas a funcao so pode ter 1 linha
+~~~Python
+lambda x : x > 0
+~~~
+<br>
+
+## map, filter
+~~~Python
+map(lambda x : x+3, [4,5,6,7])
+
+filter(lambda x: x>0, [4,-5,6,-7])
+~~~
+mas use o list comprehension em vez de map+filter
+<br>
+
+## fold (reduce)
+foldl:
+~~~Python
+from functools import reduce
+
+reduce(combinacao, lista, inicial)
+~~~
+<br>
+
+## funções que recebem funções como um argumento extra
+key: uma funçao que é aplicada em cada elemento e cujo valor é usado na computação
+~~~Python
+max( iteratable, key=func)
+list.sort(key=func)
+sorted( iteratable, key=func)
+max(lista,key=func)
+=
+max([(func(x),x) for x in lista])[1]
+~~~
+<br>
+
+## modulo operator
+x[i] ou x['chave'] ou x.chave podem ser convertidos em funções para o argumento x
+- itemgetter - f = itemgetter(2) entao f(x) retorna x[2]
+- f = itemgetter(2,3,5) entao f(x) retorna (x[2],x[3],x[5])
+- attrgetter - f = attrgetter("chave") entao f(x) retorna x.chave
+<br>
+
+# Debug
+em python modulo pbd https://docs.python.org/3/library/pdb.html
+~~~Python
+>>> import pdb
+>>> import mymodule
+>>> pdb.run('mymodule.test()')
+~~~
+ou
+
+~~~Python
+python3 -m pdb meuprog.py
+~~~
+
+Exemplo https://realpython.com/python-debugging-pdb/
+
+video https://www.youtube.com/watch?v=6RkGmqcfiTw
+<br>
+
+## breakpoint
+interrompe a execução e entra no modo debug
+
+coloque
+
+breakpoint()
+na linha do código.
+
+ou (isso é o que realmente acontece)
+
+import pdb; pdb.set_trace()
+o prompt muda para (pdb)
+
+## ponto da execução
+antes da execução de uma linha de codigo
+
+## next (n)
+executa ate a proxima linha da mesma função
+```
+--> m = func(4)
+    proc(m+5)
+```
+
+next executa m=func(4) e vai para antes de proc(m+4)
+<br>
+
+## step (s)
+entra no debug da proxima função na execução, nesse caso entra e para na 1a linha de func
+
+## continue
+roda normalmente até o fim do programa ou ate o proximo breakpoint
+
+## inspecionar e modificar o estado
+print var
+
+interact cria um REPL neste ponto (com acesso a variáveis locais)
+
+é possivel trocar o valor de variaveis locais e continuar a execução usando os novos valores
+
+## mover na pilha de execução (e inspecionar o estado nela)
+up (função que chamou) e down
+
+## checagem de tipo em tempo de execução
+variável x
+
+isinstance(x, str)
+ou
+
+type(x) is srt
+<br>
+
+# type hints
+https://www.python.org/dev/peps/pep-0484/
+
+def soma(x: int, y: int):
+mas ok rodar
+
+soma('3','4')
+vc precisa rodar usando um interpretador estendido mypy
+
+## linguagem para definir os tipos
+voce precisa de uma linguagem para definir tipos complexos e é isso que o PEP define
+
+- se soma pode aceitar `int` e `float`
+- uma lista qualquer
+- lista de `str`
+- um dicionário cuja chave é uma tupla de valores x e y
+- qualquer tipo
+- funções de um tipo particular
+- etc
+<br>
+  
+# Cython
+Extensões tipo C do python https://cython.org/
+
+sintaxe de controle do python
+declaração de tipos de variáveis locais
+pode incluir operações/funções do python (mas isso torna o código mais lento pois tem que haver a conversão para objetos python)
+Veja a função Primes em https://cython.readthedocs.io/en/latest/src/tutorial/cython_tutorial.html
+
+curso sobre cython https://nyu-cds.github.io/python-cython/
+
+Ha poucos sites discutindo cython + numpy
+</details>
 
 <!-- 
 ##########################################################################################################################################################
