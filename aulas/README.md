@@ -5516,3 +5516,848 @@ Ha poucos sites discutindo cython + numpy
 ##########################################################################################################################################################
 ##########################################################################################################################################################
 -->
+<br>
+
+![Lisp](https://img.shields.io/badge/%CE%BB-%20Lisp-%2300599C.svg?style=for-the-badge&logo=%CE%BB&logoColor=white)
+
+<details>
+  <summary>Aula 19 - Lisp</summary>
+
+# Aula 19 - Lisp
+##### https://lisp-lang.org ou https://common-lisp.net/downloads (common lisp)
+
+##### https://common-lisp.net/downloads lisp online
+
+##### https://clojure.org/index Clojure
+
+- 1958
+- primeira linguagem funcional
+- primeiro REPL
+- vários dialetos
+  - metaprogramcaçao ou macros
+  - varias implementações (com diferenças)
+- scheme 1970
+- common lisp 1975 - virou o padrão
+- clojure 2005
+- racket 2010 - para criar outras linguagens de programação
+
+
+Lisp é facilmente modificável e acaba incorporando ideias novas em programação
+- OO (1983 logo depois de Modula)
+- call with continuation
+- pattern matching
+- lazy evaluation(??)
+- etc
+<br><br>
+
+# Listas
+Entre pareteses, heterogenea, separa por brancos
+~~~Lisp
+(5  6  9.8 abobora () (5 6)  "abc")
+~~~
+abobora é um simbolo/atomo, como em prolog.
+<br><br>
+
+# Sintaxe
+~~~Lisp
+(funcao arg1  arg2 ...)
+
+(operador arg1 arg2 ...)
+
+(special-form arg1 arg2 ...)
+(+ 4 5 6 (cos 4))
+
+(if (> x 0) (* x 4) (- x 2))
+~~~
+<br><br>
+
+# Diferença de função e comando (special form)
+Em outras linguagens de programação uma diferença é a sintaxe
+~~~Lisp
+ if (a<b)  a else b 
+
+ if(a<b,a,b)
+~~~
+<br>
+
+mas em lisp nao há diferença sintática
+~~~Lisp
+     (if (> a b) a b)
+          
+     (func (> a b) a b)
+~~~
+<br>
+
+A diferença central é que funções sempre avaliam seus argumentos e comandos podem nao avaliar todos
+~~~Lisp
+(if (> a b) a (/ 1 0))
+~~~
+se a > b (/ 1 0) não é avaliado e nao da problema. Se fosse uma funçao (que avalia seus argumentos antes de rodar - a nao ser o Haskell por causa do lazy!) isso daria problema.
+<br><br>
+
+# let
+versão simples
+~~~Lisp
+(let ()
+    exp1
+    exp2
+    ...
+    expn)
+~~~
+avalia cada expressão **na ordem**. Retorna o valor da ultima expressão
+<br>
+
+versão com variáveis locais
+~~~Lisp
+(let ((var1 val1)
+      (var2 val2)
+      ...
+      )
+    exp1
+    exp2
+    ...
+    expn)
+~~~
+cria as variáveis locais **var1** … e atribui os valores **val1** … (como no haskell)
+<br><br>
+
+# setf
+(setf x exp) avalia a expressão e atribui a variável x (local ou global)
+<br><br>
+
+# defun
+define funções
+~~~Lisp
+(defun double (x)
+    (* x 2)
+    )
+    
+(defun aux (x y)
+    (let ((a (+ x y))
+          b
+          )
+     ...
+    )
+)
+~~~
+<br><br>
+
+# listas (funcoes)
+- `cons` gruda na frente de uma lista (: do haskell)
+- `car first` a cabeça da lista
+- `cdr rest` o resto da lista
+- `null` testa se a lista é vazia
+- `NIL` ou `()` lista vazia
+- `append` gruda 2 ou mais listas
+- `list` cria uma lista de seus argumentos
+- `eq eql equal equalp =` testes de igualdade https://eli.thegreenplace.net/2004/08/08/equality-in-lisp
+- igualdades rapidas/atomicas O(1) `eq eql =` e igualdades lógicas O(n) listas, etc
+- há o problema do caso infinito para igualdades lógicas
+
+~~~Lisp
+class X
+ pass
+ 
+a = X()
+a.nome = "jose" 
+a.dado = a
+
+b = X()
+b.nome = "jose" 
+b.dado = b
+
+a==b
+~~~
+<br><br>
+
+# Exemplos de programas
+~~~Lisp
+(defun reverte (lista)
+    (if (null lista) NIL
+        (append (reverte (rest lista)) 
+                (list (first lista)))
+        ))
+(defun revacc (lista acc)
+    (if (null lista) acc
+        (revacc (rest lista) 
+                (cons (first lista) acc))
+        ))
+(defun trocatodos (novo velho lista)
+    (if (null lista) nil
+        (if (eql (first lista) velho) 
+            (cons novo (trocatodos novo velho (rest lista)))
+            (cons (first lista) (trocatodos novo velho (rest lista)))
+        )
+    )
+)
+~~~
+<br>
+ou
+~~~Lisp
+(defun trocatodos (novo velho lista)
+    (if (null lista) nil
+        (let ((a (first lista))
+              (r (rest lista))
+             )
+           (if (eql a velho) 
+               (cons novo (trocatodos novo velho r))
+               (cons a (trocatodos novo velho r))
+           )
+       )
+    )
+)
+~~~
+<br>
+
+ou ainda
+~~~Lisp
+(defun trocatodos (novo velho lista)
+    (if (null lista) nil
+        (let* ((a (first lista))       <---- let*
+               (r (rest lista))
+               (resto (trocatodos novo velho r))
+             )
+           (if (eql a velho) 
+               (cons novo resto)
+               (cons a resto))
+           )))
+~~~
+<br><br>
+
+# Exercicios
+os mesmos da 1a aula do haskell (e do prolog)
+
+- dado um item e uma lista, escreva a funcao separa que retorna um lista com 2 sublistas, a primeira sao os itens da lista antes do separador e a segunda os itens apos o separador
+~~~Lisp
+(defun separa (item lista)
+    (if (null lista) (list nil nil)
+        (if (eql item (first lista)) 
+            (list nil (rest lista))
+            (let* ((x (separa item (rest lista)))
+                   (y (first x))
+                   (z (rest x))
+                  )
+                  (cons (cons (first lista) y) z)
+              ))))
+~~~
+<br><br>
+
+# quote
+`(1 2 3)` não funciona, `1` não é uma função/operador/forma especial
+
+listas são avaliadas como expressões.
+
+eu preciso desligar o avaliador para criar a lista (1 2 3)
+
+~~~Lisp
+(quote (1 2 3))
+
+'(1 2 3)
+~~~
+<br>
+
+ou
+~~~Lisp
+(list 1 2 3)
+(cons 1 (cons 2 (cons 3 nil)))
+~~~
+<br><br>
+
+# avaliação
+Como `(list 1 2 (+ 4 5))` avalia?
+
+- o 1º elemento da lista é uma funçao list
+- avalia cada um dos argumentos
+- números avaliam para eles mesmos `1 ==> 1, 2 ==> 2`
+- `(+ 4 5)` é uma nova lista/expressão. + é uma função.
+- recursivamente avalia `(+ 4 5)` para 9
+- roda o `list` que cira uma lista com 1 2 e 9
+- retorna `(1 2 9)`
+
+
+Outras coisas além de números avaliam para si mesmos
+- strings
+- nil avalia para ()
+- () avalia para si mesmo
+- ‘T’ avalia para si mesmo (True)
+- simbolos começando com : (keywords)
+
+A avaliação de um simbolo retorna o valor armazenado (via let ou setf) no simbolo/variável
+~~~Lisp
+(setf x (+ 1 2))
+x
+
+(let ((x 99.7))
+    (print x))
+~~~
+
+quote simbolo retorna o simbolo: `'abc` retorna o simbolo `abc`
+<br><br>
+
+# Static & Dynamic scope
+variavies livres em funções.
+~~~Lisp
+(setf x 8)
+(defun f1 (a) (+ x a))
+   
+(let ((x 100)) 
+        (f1 4))
+        
+~~~
+==> 12
+<br>
+
+em python
+~~~Python
+x = 8
+def f1 (a):
+    return x+a
+    
+def f2():
+    x = 100
+    f1(4)
+
+f2()
+~~~
+==> 12
+<br>
+
+que é o comum em outras linguagens de programação. A variavel “livre” x de f1 vem do contexto sintatico onde a definição de f1 esta. Nesse caso a variavel global.
+
+Isto é o escopo **estatico**
+
+Lisp permite o escopo **dinamico**
+~~~Lisp
+
+(defvar x 8)   <--- declara um escopo dinamico para x
+(defun f1 (a) 
+    (+ x a))
+
+(let ((x 100)) (f1 4))
+~~~
+==> 104
+
+no segundo caso, o escopo de x é **dinamico**, e o valor usado será o último disponível na pilha de execuçao.
+<br><br>
+
+# como construir um programa montando uma lista
+~~~Lisp
+(list 'if '(> x 0) (cons '* '(x 4))
+      (list '- 'x 2))
+~~~      
+==>       
+      
+(if (> x 0) (* x 4) (- x 2))      
+      
+isso é o central na metaprogramação
+<br><br>
+
+# macros/metaprogramming
+“funções” que nao avaliam seus argumentos, mas geram uma lista usando esses argumentos, que é uma expressão Lisp. Essa lista gerada é avaliada ou compilada
+~~~Lisp
+(when teste a1 a2 .. an) 
+~~~
+
+===> converte para
+~~~Lisp
+(if teste (let ()
+           a1 a2 .. an))
+(defmacro when2 (teste &rest resto)
+    (list 'if teste (cons 'let (cons () resto)))
+    )
+
+(macroexpand '(when2 (pos a) (incf a) (print a)))
+(pyif  teste t1 t2 t3 else: e1 e2)
+~~~
+
+==> converte para 
+~~~Lisp
+(if teste (let () t1 t2 t3) (let () e1 e2))
+
+(defmacro pyif (teste &rest resto)
+    (let* ((troca (separa `else: resto))
+           (pthen  (first troca))
+           (pelse  (second troca))
+           (xthen (if (null pthen) nil
+                      (cons 'let (cons nil pthen))))
+           (xelse (if (null pelse) nil
+                      (cons 'let (cons nil pelse))))
+          )
+       (list 'if teste xthen xelse)
+       ))
+~~~
+<br><br>
+
+# read macros
+define comportamentos na leitura para caracteres especias
+
+`'( a b c)` ==> `(quote (a b c))`
+`quote` é uma forma especial que nao avalia seu argumento e retorna ele
+
+- backquote - para macros
+- #' para funções
+- #(1 2 3) ==> (vector 1 2 3)
+- etc
+
+~~~Lisp
+(defmacro when2 (teste &rest resto)
+    `(if ,teste 
+         (let () ,@resto)
+         )
+)
+~~~
+<br><br>
+
+# lisp-1 vs lisp-2
+Se variáveis podem ter tanto um valor e uma função associada (lisp-2) ou apenas um valor (que pode ser uma função) (lisp-1)
+
+python
+~~~Python
+soma1 = 6
+
+def soma1 (a):
+    return a*2
+~~~
+x só pode ter um valor (e vira uma função no def)
+
+common lisp
+~~~Common-Lisp
+(setf soma1 6)
+(defun soma1 (a) (+ 1 a))
+~~~
+common lisp é um lisp-2
+scheme é um lisp-1
+<br>
+
+O problema de um lisp-2 sao as funções de alto nível
+~~~Common-Lisp
+(map soma1 '(1 2 3 4))
+~~~
+- em lisp-2 `soma1` vai ser avaliado e retorna o valor armazenado no simbolo e não a função definida.
+
+- é preciso uma forma especial que retorna a função associada a um simbolo
+~~~Common-Lisp
+(map #'soma1 '(1 2 3))
+~~~
+<br><br>
+
+# Clojure
+- como Scala, compila para JVM, e é compatível com bibliotecas e código já escrito em java
+
+- usado como linguagem principal(?) de desenvolvimento no Nubank https://building.nubank.com.br/clojure-15th-anniversary-a-retrospective/ que comprou a Clojure https://olhardigital.com.br/2020/07/24/pro/nubank-compra-criadora-das-linguagens-de-programacao-clojure-e-datomic/
+
+- mudanças sintáticas.
+
+A mais importante é listas que não vão ser avaliadas (em formas especiais) são trocadas por [ ]
+~~~Common-Lisp
+(defun soma (x y)
+   (let ((soma (+ x y))
+        )
+    soma
+    ))
+    
+(defn soma [x y]
+   (let [soma (+ x y)]
+    soma))
+~~~
+- interoperabilidade com java: veja em https://clojure.org/guides/learn/functions Java Interop
+
+- vetores, dicionários, sets
+<br><br>
+
+# Implementação de lisp
+uma implementação inicial de lisp é fácil.
+
+processamento sinatico é facil - expressões estão entre ( e ) casados
+
+implemente (no baixo nível) apenas alguns primitivos
+
+- atribuição (setf)
+- construção de lista (cons)
+- um condicional (if)
+- quote
+- definição de função anonima
+- macros
+- aplicação de uma função
+- operacoes aritmeticas em numeros e 2 funcoes em listas (cons, first e rest)
+- mais alguns poucas coisas….
+
+Por exemplo https://homes.cs.aau.dk/~normark/prog3-03/html/notes/languages_themes-list-in-lisp.html
+
+https://stackoverflow.com/questions/2664618/what-does-it-mean-that-lisp-can-be-written-in-itself
+
+https://github.com/fluentpython/lispy/tree/main
+
+As outras coisas são macros do próprio lisp
+
+**Meta-circular evaluator**
+</details>
+
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
+<br>
+
+![OCaml](https://img.shields.io/badge/OCaml-%23E98407.svg?style=for-the-badge&logo=ocaml&logoColor=white) ![F# Badge](https://img.shields.io/badge/F%23-378BBA?logo=fsharp&logoColor=fff&style=for-the-badge) 
+
+<details>
+  <summary>Aula 20(Parte 1) - oCaml e F#</summary>
+
+  # Aula 11 OCAML e F#
+##### [OCAML online](https://try.ocamlpro.com/)
+
+##### [tutoriais](https://ocaml.org/learn/tutorials/)
+
+# OCaml e F#
+## OCaml
+outra linguagem funcional mas com componentes de linguagem imperativa
+
+## Coisas parecidas
+### listas
+como em Haskell (homogênea) mas separado por ;
+~~~ocaml
+let a = [1; 2; 3; 7; 5; 1]
+~~~
+No pattern matching e na construção, o operador que separa head de tail é :: e não : (no Haskell)
+~~~ocaml
+let b = 7 :: a
+~~~
+<br><br>
+
+### Aplicação de função
+Como em Haskell - mesma sintaxe sem parenteses e virgula separando função de argumento
+~~~ocaml
+let f x y = 2*x+y
+
+f 4 3
+~~~
+- currying tambem vale
+<br><br>
+
+### Funcoes recursivas
+precisa usar a palavre rec
+~~~ocaml
+let rec gera n =
+    if n=0 then []
+    else n :: gera (n-1)
+~~~
+<br><br>
+
+# Pattern matching e Guards (usando o match +when)
+~~~ocaml
+let rec pertence x lista =
+    match lista with
+     |  []               -> false
+     |  a::_   when  x = a -> true
+     |  _::as            -> pertence x as
+~~~
+<br><br>
+
+# Outras
+- `let ... in` para definir funções e variáveis locais
+- `List.map` e `List.fold_left` em vez de `map` e `foldl`
+<br><br>
+
+# Coisas diferentes
+## =
+- teste de igualdade é apenas um = que é tambem o operador para “definição de função” (super confuso) (veja o código do pretence acima)
+<br><br>
+
+## strict (nao Lazy)
+Haskell 
+~~~haskell
+f _ = 3
+
+f (1/0) -> 3
+~~~
+<br>
+
+OCAML
+~~~ocaml
+let f _ = 3
+
+f (1/0) -> erro divisão por 0
+~~~
+<br><br>
+
+## tipagem forte
+- não converte de `int` para `float` automaticamente
+- tem operações diferentes para `int` e `float`: `+` para int, `+.` para float
+<br><br>
+
+## permite modificar (algumas) variáveis
+~~~ocaml
+let quit_loop = ref false in
+  while not !quit_loop do
+    print_string "Have you had enough yet? (y/n) ";
+    let str = read_line () in
+      if str.[0] = 'y' then
+        quit_loop := true
+  done;;
+~~~
+
+- `quit_loop` é um “apontador” (ref) para bool
+
+- `!quit_loop` é o valor de quit_loop
+- `:=` é atribuição
+- `read_line` tem tipo `unit -> string` e o `()` o único dado to tipo `unit`
+- `read_line ()` é escrito como `read_line()` que se parace com uma função sem argumentos na sintaxe mais tradicional.
+<br><br>
+
+
+##  Arrays
+Arrays sao vetores modificáveis
+~~~ocaml
+let add_vect v1 v2 =
+   let len = min (Array.length v1) (Array.length v2) in
+   let res = Array.make len 0.0 in
+   for i = 0 to len - 1 do
+     res.(i) <- v1.(i) +. v2.(i)
+   done;
+   res;;
+~~~
+
+- note a operação <- (e nao o :=)
+
+- note tambem o for que é apenas para gerar números.
+
+- nao existe o break para sair de um loop
+<br><br>
+
+
+## Comandos
+- Existe um tipo unit ou () que é um comando (que não retorna nada - o importante é seu efeito colateral)
+
+- voce pode usar o padrão
+```
+comando;
+comando;
+..
+comando;
+expressão
+```
+no lugar de expressões.
+
+Veja de novo
+~~~ocaml
+let quit_loop = ref false in
+while not !quit_loop do
+  print_string "Have you had enough yet? (y/n) "; --> comando
+  let str = read_line () in
+  if str.[0] = 'y' then                  -> um if sem else!
+    quit_loop := true                             -> comando
+done;;
+~~~
+
+me parece que o `while` é um comando tambem que retorna `()`
+<br><br>
+
+# haskell vs OCaml
+https://markkarpov.com/post/haskell-vs-ocaml.html
+<br><br>
+<hr>
+<br>
+
+# F#
+##### (fonte https://learn.microsoft.com/en-gb/dotnet/fsharp/
+
+Bem parecido com OCaml
+- declaracao de função
+~~~F#
+let doubleIt x = 2*x
+
+let doubleIt = fun n -> 2 * n
+
+fun n é uma lambda expression
+~~~
+<br>
+
+- sintaxe de metodos para alguns tipos pre definidos
+~~~F#
+let str = "F#"
+let lowercase = str.ToLower()
+~~~
+<br>
+
+- pattern matching parecido mas nao igual ao OCaml
+~~~F#
+// This example uses a record pattern.
+
+type MyRecord = { Name: string; ID: int }
+
+let IsMatchByName record1 (name: string) =
+  match record1 with
+  | {MyRecord.Name = nameFound; MyRecord.ID = _;} when nameFound = name -> true
+  | _ -> false
+~~~
+<br>
+
+-  variaveis mutaveis
+~~~F#
+let mutable x = 1
+x <- x + 1
+~~~
+<br>
+
+- <- atribuicao
+- listas [1; 2; 3 ]
+- arrays como tipo basico , com representacao sintatica [| 1;2;3 |] e mutavel.
+- unidades metricas para os valores https://learn.microsoft.com/en-gb/dotnet/fsharp/language-reference/units-of-measure o compilador checa unidades corretas (inclui conversão??) - talvez exista algo assim tambem em haskell?
+- OO (uma classe na verdade é um novo tipo)
+
+~~~F#
+module DefiningGenericClasses = 
+
+    type StateTracker<'T>(initialElement: 'T) = 
+
+        /// This internal field store the states in a list.
+        let mutable states = [ initialElement ]
+
+        /// Add a new element to the list of states.
+        member this.UpdateState newState = 
+            states <- newState :: states  // ***use the '<-' operator to mutate the value.***
+
+        /// Get the entire list of historical states.
+        member this.History = states
+
+        /// Get the latest state.
+        member this.Current = states.Head
+
+/// An 'int' instance of the state tracker class. Note that the type parameter is inferred.
+let tracker = StateTracker 10
+
+// Add a state
+tracker.UpdateState 17
+~~~
+
+</details>
+
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
+<br>
+
+![Scala](https://img.shields.io/badge/scala-%23DC322F.svg?style=for-the-badge&logo=scala&logoColor=white)
+
+<details>
+  <summary>Aula 20(Parte 2) - Scala</summary>
+  
+  # Aula 11 Scala
+##### [Scala online](https://scastie.scala-lang.org/)
+##### https://learnxinyminutes.com/docs/scala/
+##### https://docs.scala-lang.org
+
+compila p/ JVM - permite rodar bibliotecas compiladas de Java
+
+acoplado a um ambiente de execucão distribuida Apache Spark https://spark.apache.org
+
+algumas diferenças entre Scala 2 e 3 (como Python 2 e 3)
+- sintaxe similar ao Python (mudança de linha e indentação)
+- variáveis mutáveis `var`e imutáveis `val`
+- List (homogenea) Array
+- `{comando; comando .., expressão}` retorna o valor da expressao
+- funcoes
+
+~~~scala
+val addOne = (x: Int) => x + 1
+~~~
+<br>
+
+metodo
+~~~scala
+def addOne(x:Int) : Int => {
+  ...;
+  ...;
+  x+1
+  }
+~~~
+<br>
+
+- classes
+~~~scala
+class Point(var x: Int, var y: Int):
+
+  def move(dx: Int, dy: Int): Unit =
+    x = x + dx
+    y = y + dy
+
+  override def toString: String =
+    s"($x, $y)"
+end Point
+~~~
+
+parametros do construtor na definicao da classe
+
+paramentros do construtor sao automaticamente atributos
+
+override explicito
+- list comprehention
+~~~scala
+val twentySomethings =
+  for user <- userBase if user.age >=20 && user.age < 30
+  yield user.name
+~~~
+<br>
+
+- funcoes de alto nivel (map filter foldLeft foldRight, etc
+~~~scala
+val salaries = Seq(20_000, 70_000, 40_000)
+val newSalaries = salaries.map(x => x * 2)
+  
+val a = List("jane", "jon", "mary", "joe")
+val b = a.filter(_.startsWith("j"))
+         .map(_.capitalize)  
+  
+def promotion(salaries: List[Double], promotionFunction: Double => Double): List[Double] =
+    salaries.map(promotionFunction)  
+~~~
+<br>
+
+- maybe
+~~~scala
+def makeInt(s: String): Option[Int] =
+  try
+    Some(Integer.parseInt(s.trim))
+  catch
+    case e: Exception => None
+
+val stringA = "one"
+val stringB = "2"
+val stringC = "3"
+
+val y = for
+  a <- makeInt(stringA)
+  b <- makeInt(stringB)
+  c <- makeInt(stringC)
+yield
+  a + b + c
+~~~
+
+</details>
+
+<!-- 
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+##########################################################################################################################################################
+-->
