@@ -32,7 +32,11 @@ A disciplina abordará as seguintes linguagens de programação, talvez não nes
 - [Uma lista de recursos](https://www.haskell.org/documentation/) para aprender Haskell
 <br>
 
-## ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=white) 
+## [![Prolog](https://github.com/raoniton/mc346/blob/main/img/logo_prolog.png)](https://www.swi-prolog.org/)
+- [Prolog quickstart](https://www.swi-prolog.org/pldoc/man?section=quickstart)
+<br>
+
+## ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=white) ![NumPy](https://img.shields.io/badge/numpy-%23013243.svg?style=for-the-badge&logo=numpy&logoColor=white)
 - Não instale a versão 2.7. Usaremos a versão 3.10 ou maior. Uma alternativa para instalar o Python é usar o [Anaconda Python](https://www.continuum.io/downloads) e talvez melhor ainda é instalar o [Miniconda](https://conda.io/miniconda.html).
 - Instale também o [Numpy](https://www.numpy.org/) (já vem no Anaconda).
 - [Documentação do Python](http://docs.python.org/index.html)
