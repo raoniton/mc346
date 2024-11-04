@@ -9,7 +9,7 @@ variavies novas para armazenar valores intermediarios da computaçao.
 Normalização L1 é garantir que a soma dos **valores absoluto** dos dados
  é igual a 1. Normalmente, normalização é garantir que a soma dos quadrados dos valores é igual a 1 (isso é oficialmente conhecido como norma-2 ou normalização L2).
 """
-import numpy as np
+import numpy as np # type: ignore
 
 def normaliza(matrix):
     #converte o array para numpy array   
