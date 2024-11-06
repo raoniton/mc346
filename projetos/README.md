@@ -328,5 +328,50 @@ Nunca imprime em `b = somaQuadrados(1,2,3)` e as outras passadas `(i==20 e i==30
 -->
 
 <details>
-  <summary>Projeto 7</summary>
+  <summary>Projeto 7 - Dijkstra em Python</summary>
+
+  # Projeto 7
+<b>Data: 6/11 (ate meia noite)</b>
+
+Implemente o projeto de Dykstra (em haskell) em Python.
+<br><br>
+
+## 1) Uma versão simplificada do Dijkstra
+Para um gráfico não direcionado, e dado um vértice de origem e um de destino, usar o algoritmo de Dykstra para calcular a menor distancia entre a origem e o destino.
+
+O gráfico será dado como uma lista de triplas `[("ab1","b67",10.4),("ab1","cc",11.2)...]` onde os 2 primeiros componentes da tupla são os nomes (um string) dos vértices, e o terceiro componente a distancia entre os 2 vértices. Note que se a distancia entre os vértices `“ab1” e “b67” é 10.4` então a distancia entre `“b67” e “ab1”` também é de `10.4` mas a lista **não** vai conter uma entrada ( "b67",  "ab1", 10,4).
+
+O problema é uma versão simplificada do Dykstra. Na versão “normal” do Dijkstra queremos não só a menor distancia entre 2 vértices mas também o caminho com essa menor distancia. Mas para esse problema não precisa computar o caminho, apenas a menor distancia.
+
+Você pode assumir que o grafo é conectado, ou seja existe um caminho entre quaisquer 2 nós do grafo.
+
+Você não precisa usar estruturas de dados complexas como um “priority queue” que sao O(1) para achar o minimo. Pode fazer uma busca linear para achar o mínimo e usar as funções já disponíveis no HasPythonkell.
+
+A função principal deve se chamar `proj7` e ela recebe 3 argumentos, o grafo no formato especificado, o nó origem e o nó destino.
+
+Vc pode usar as bibliotecas padrão do Python.
+
+A pagina do Dykstra na wikipedia https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm tem uma animaçao do algoritmo para um grafo simples. Aquele grafo corresponde ao dado abaixo.
+```
+[ ("1", "2", 7),
+  ("1", "3", 9),
+  ("1", "6", 14),
+  ("2", "3", 10),
+  ("2", "4", 15),
+  ("3", "4", 11),
+  ("3", "6", 2),
+  ("4", "5", 6),
+  ("5", "6", 9)
+  ]
+```
+<br>
+
+## 2) grafo não necessariamente conectado
+Esta parte do projeto vale apenas 1/4 da nota total do projeto.
+
+Na parte anterior assuminos que o grafo era conectado. No miolo do Dijkstra, ha o passo onde precisamos achar a aresta de menor tamanho que liga um vertice já visitado com um não visitado. Se o grafo é conectado havera sempre pelo menos 1 aresta entre os 2 conjuntos de nós. Se o grafo não é conectado, pode não haver nenhuma aresta ligando esses 2 conjuntos.
+
+Agora o grafo não será necessariamente conectado e sua funcão deve retornar alguma indicacão que não existe um caminho que liga o vertice origem do vertice destino. Seu programa deve retornar `um numero` se houver um caminho minimo ou `None` se nao houver esse caminho minimo.
+
+Se vc implementar essa segunda parte, implemente apenas um funcão `proj7`. quando ela recebe um grafo conectado retorna `um numero` e se nao, retorna `None`.
 </details>  
