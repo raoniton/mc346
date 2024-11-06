@@ -169,6 +169,8 @@ def caminho(path, vertices, origem, destino):
     return "".join(result_aux)
 
 ############################################################################################################
+# os exemplos estao no codigo -> HARD CODED 
+
 # Exemplo de grafo conexo    
 input = [("1", "2", 7),("1", "3", 9),("1", "6", 14),("2", "3", 10),("2", "4", 15),("3", "4", 11),("3", "6", 2),("4", "5", 6),("5", "6", 9)]
 orig = "1"
